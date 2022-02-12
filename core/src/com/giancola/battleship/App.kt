@@ -6,8 +6,11 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.StretchViewport
-import com.giancola.battleship.screens.Game
+import com.giancola.battleship.screens.DemoScreen
+import com.giancola.battleship.screens.PlacementScreen
 import ktx.app.KtxGame
+import com.badlogic.gdx.InputMultiplexer
+
 
 class App : KtxGame<Screen>() {
 
@@ -27,13 +30,20 @@ class App : KtxGame<Screen>() {
         this.sb = SpriteBatch()
 
         this.cam = OrthographicCamera(this.width, this.height)
-        this.view = StretchViewport(480f, 360f, this.cam)
+        this.view = StretchViewport(GameConstants.WORLD_WIDTH, GameConstants.WORLD_HEIGHT, this.cam)
         this.stg = Stage(this.view, this.sb)
 
-        val game = Game(this)
+        val im = InputMultiplexer()
+        im.addProcessor(this.stg)
+        Gdx.input.inputProcessor = im
 
-        addScreen(game)
-        setScreen<Game>()
+
+        //val gameScreen = DemoScreen(this)
+        val gameScreen = PlacementScreen(this)
+
+        addScreen(gameScreen)
+        //setScreen<DemoScreen>()
+        setScreen<PlacementScreen>()
     }
 
     override fun dispose() {

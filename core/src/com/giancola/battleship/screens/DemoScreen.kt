@@ -8,7 +8,7 @@ import ktx.app.KtxScreen
 import ktx.graphics.*
 
 
-class Game(val app: App) : KtxScreen {
+class DemoScreen(val app: App) : KtxScreen {
     private val sr = ShapeRenderer()
     private var rotation = 0.0f
 
