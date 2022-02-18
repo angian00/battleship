@@ -1,5 +1,6 @@
 package com.giancola.battleship
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Rectangle
 import com.giancola.battleship.GameConstants.WORLD_HEIGHT
 
@@ -11,14 +12,15 @@ object GameConstants {
     const val N_COLS = 10
 
     const val TILE_SIZE = 36f
+    const val TILE_SIZE_SMALL = 18f
 }
 
 
 object LayoutConstants {
-    val playerBoard = Rectangle(0f, 85f, 360f, 360f)
-    //val playerBoard = Rectangle(0f, 280f, 360f, 360f)  //DEBUG
+    val placementBoard = Rectangle(0f, 85f, 360f, 360f)
+    //val placementBoard = Rectangle(0f, 280f, 360f, 360f)  //DEBUG
 
-    val shipPositions = listOf(
+    val placementShipPositions = listOf(
         Rectangle(16f, 462f, 180f, 36f),
         Rectangle(6f, 512f, 144f, 36f),
         Rectangle(230f, 462f, 108f, 36f),
@@ -26,8 +28,11 @@ object LayoutConstants {
         Rectangle(282f, 512f, 72f, 36f)
     )
 
-
     val placementButton = Rectangle(60f, 584f, 240f, 50f)
+
+
+    val combatPlayerBoard = Rectangle(0f, 85f, 180f, 180f)
+    val combatEnemyBoard = Rectangle(0f, 280f, 360f, 360f)
 
     fun standard2worldCoords(layoutRect: Rectangle): Rectangle {
         val flippedY = WORLD_HEIGHT - layoutRect.y -layoutRect.height
@@ -38,4 +43,8 @@ object LayoutConstants {
 
 object GraphicsConstants {
     const val movementAnimDuration = 0.25f
+
+    val shipHealthyColor: Color = Color.GREEN
+    val shipDamagedColor: Color = Color.ORANGE
+    val shipSunkColor: Color = Color.RED
 }

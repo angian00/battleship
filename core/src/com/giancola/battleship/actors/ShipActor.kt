@@ -17,7 +17,7 @@ import java.util.*
 import kotlin.math.roundToInt
 
 
-class ShipActor(private val screen: PlacementScreen, private val shipId: Pair<ShipType, Int>): Actor(),
+class ShipActor(private val screen: PlacementScreen, val shipId: Pair<ShipType, Int>): Actor(),
     ShipGestureListener.ShipGestureCallbacks {
 
     private val texture: Texture
@@ -35,8 +35,10 @@ class ShipActor(private val screen: PlacementScreen, private val shipId: Pair<Sh
 
     init {
         val shipType = shipId.first
-        val filename = "ship_${shipType.name.toLowerCase(Locale.US)}.png"
+        val filename = "ship_${shipType.name.toLowerCase(Locale.US)}_36.png"
         texture = Texture(filename)
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
+
         textureRegion = TextureRegion(texture)
 
         this.width = texture.width.toFloat()
@@ -104,7 +106,7 @@ class ShipActor(private val screen: PlacementScreen, private val shipId: Pair<Sh
 
     private fun snapToGrid() {
         val board = screen.board
-        val bbox = getBounds()
+        val bbox = getBoundingBox()
 
         //Gdx.app.log("Battleship", "before snapToGrid:")
         //Gdx.app.log("Battleship", getGeometry())
@@ -128,7 +130,7 @@ class ShipActor(private val screen: PlacementScreen, private val shipId: Pair<Sh
     }
 
     private fun getGeometry(): String {
-        val bbox = getBounds()
+        val bbox = getBoundingBox()
 
         return "x=${x}, y=${y}, originX=${originX}, originY=${originY}, rotation=${rotation} \n" +
                 "bbox.x=${bbox.x}, bbox.y=${bbox.y}, bbox.width=${bbox.width}, bbox.height=${bbox.height}"

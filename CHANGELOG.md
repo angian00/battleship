@@ -2,6 +2,13 @@
 # Change Log
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [0.3] - 2022-02-
+### Added
+- half size ship sprites
+- combat screen:
+  - put ship sprites on player board (with rotation)
+  - put enemy shots on player board
+
 
 ## [0.2] - 2022-02-18
 ### Added
