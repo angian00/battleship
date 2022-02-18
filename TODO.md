@@ -1,3 +1,5 @@
 # TODO
-- compilare Android
-? skins
+
+
+- confirm button enabledisabled instead of hidden
+- 

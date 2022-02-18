@@ -22,6 +22,7 @@ class App : KtxGame<Screen>() {
 
     lateinit var cam: OrthographicCamera
     lateinit var stg: Stage
+    lateinit var im: InputMultiplexer
 
     override fun create() {
         width = Gdx.graphics.width.toFloat()
@@ -33,7 +34,7 @@ class App : KtxGame<Screen>() {
         this.view = StretchViewport(GameConstants.WORLD_WIDTH, GameConstants.WORLD_HEIGHT, this.cam)
         this.stg = Stage(this.view, this.sb)
 
-        val im = InputMultiplexer()
+        this.im = InputMultiplexer()
         im.addProcessor(this.stg)
         Gdx.input.inputProcessor = im
 
