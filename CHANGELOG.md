@@ -2,12 +2,19 @@
 # Change Log
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [0.3] - 2022-02-
+## [0.3] - 2022-02-19
 ### Added
-- half size ship sprites
 - combat screen:
-  - put ship sprites on player board (with rotation)
-  - put enemy shots on player board
+  - player board
+  - enemy board
+  - miss/hit tile sprites
+  - half size ship sprites
+
+### Modified
+- refactored common code in enemy and player combat board, placement board
+
+### Fixed
+- random overlaps in PlacementScreen because of Float finite precision
 
 
 ## [0.2] - 2022-02-18

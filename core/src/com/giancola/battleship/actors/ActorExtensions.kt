@@ -5,6 +5,15 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
+import kotlin.math.round
+
+
+fun Rectangle.roundCoords(): Rectangle = Rectangle(
+        round(this.x),
+        round(this.y),
+        round(this.width),
+        round(this.height)
+)
 
 fun Actor.getBoundingBox(): Rectangle {
     val vertices = floatArrayOf(0f, 0f, this.width, 0f, this.width, this.height, 0f, this.height)
@@ -13,7 +22,7 @@ fun Actor.getBoundingBox(): Rectangle {
     boundaryPolygon.setOrigin(this.originX, this.originY)
     boundaryPolygon.rotation = this.rotation
 
-    return boundaryPolygon.boundingRectangle
+    return boundaryPolygon.boundingRectangle.roundCoords()
 }
 
 fun Actor.overlaps(other: Actor): Boolean  = this.getBoundingBox().overlaps(other.getBoundingBox())

@@ -7,27 +7,23 @@ import com.badlogic.gdx.math.GridPoint2
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.giancola.battleship.*
-import com.giancola.battleship.GameConstants.N_COLS
-import com.giancola.battleship.GameConstants.N_ROWS
 import com.giancola.battleship.GameConstants.TILE_SIZE
+import com.giancola.battleship.actors.InteractiveShipActor
 import com.giancola.battleship.actors.PlacementBoard
-import com.giancola.battleship.actors.ShipActor
 import com.giancola.battleship.actors.getBoundingBox
 import com.giancola.battleship.actors.overlaps
 import com.giancola.battleship.ui.Styles
 import ktx.actors.onClick
 import ktx.app.KtxScreen
-import java.lang.Math.round
 import kotlin.math.roundToInt
 
 
 class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAdapter() {
-    private val playerData = PlayerData("Guerino", N_ROWS, N_COLS, ShipFactory.standardSetup)
-    //private val playerData = PlayerData("Guerino", N_ROWS, N_COLS, ShipFactory.debugSetup)
+    private val playerData = PlayerData("Guerino", ShipFactory.standardSetup)
 
     private val bkg: Image
     val board: PlacementBoard
-    val ships: Map<Pair<ShipType, Int>, ShipActor>
+    val ships: Map<Pair<ShipType, Int>, InteractiveShipActor>
     private val confirmButton: TextButton
 
     init {
@@ -36,7 +32,7 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
         bkg = Image(Texture("placement_background.png"))
         gameApp.stg.addActor(bkg)
 
-        board = PlacementBoard(this)
+        board = PlacementBoard(gameApp.stg)
         gameApp.stg.addActor(board)
 
         confirmButton = TextButton("Confirm", Styles.buttonStyle)
@@ -48,6 +44,7 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
             updatePlayerData()
 
             gameApp.stg.clear()
+
             val combatScreen = CombatScreen(gameApp, playerData)
             gameApp.addScreen(combatScreen)
             gameApp.setScreen<CombatScreen>()
@@ -59,9 +56,9 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
         gameApp.stg.addActor(confirmButton)
 
 
-        val mutableMap = mutableMapOf<Pair<ShipType, Int>, ShipActor>()
+        val mutableMap = mutableMapOf<Pair<ShipType, Int>, InteractiveShipActor>()
         for ((i, shipId) in this.playerData.shipPlacement.keys.withIndex()) {
-            val shipActor = ShipActor(this, shipId)
+            val shipActor = InteractiveShipActor(this, shipId)
 
             val shipRect = LayoutConstants.standard2worldCoords(LayoutConstants.placementShipPositions[i])
             shipActor.setPosition(shipRect.x, shipRect.y)

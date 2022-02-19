@@ -39,10 +39,6 @@ class BattleshipGame: KtxGame<Screen>() {
         im.addProcessor(this.stg)
         Gdx.input.inputProcessor = im
 
-
-        //addScreen(DemoScreen(this))
-        //setScreen<DemoScreen>()
-
         addScreen(PlacementScreen(this))
         setScreen<PlacementScreen>()
     }

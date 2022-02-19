@@ -1,9 +1,15 @@
 package com.giancola.battleship.actors
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.InputListener
+import ktx.actors.KtxInputListener
+import ktx.actors.onClick
+import ktx.actors.onClickEvent
 import kotlin.math.roundToInt
 
 class Tile(val iTile: Int, val jTile: Int, val tileSize: Float): Actor() {
@@ -14,11 +20,6 @@ class Tile(val iTile: Int, val jTile: Int, val tileSize: Float): Actor() {
 
     init {
         currTexture = emptyTexture
-        /*
-        this.onClick {
-            Gdx.app.log("Battleship", "clicked on $iTile, $jTile")
-        }
-         */
     }
 
     fun setHit() {

@@ -21,7 +21,7 @@ fun Stage.getDropTargets() =
     }
 
 
-class ShipGestureListener(private val ship: ShipActor) : ActorGestureListener() {
+class ShipGestureListener(private val ship: InteractiveShipActor) : ActorGestureListener() {
     private var isDragging = false
     private var grabOffsetX = 0f
     private var grabOffsetY = 0f
@@ -87,7 +87,7 @@ class ShipGestureListener(private val ship: ShipActor) : ActorGestureListener() 
             }
         }
 
-        if (dropTarget == null || (dropTarget !is PlacementBoard)) {
+        if (dropTarget == null || (dropTarget !is Board)) {
             ship.addAction(Actions.moveTo(startPositionX, startPositionY,2 * movementAnimDuration, Interpolation.pow3))
             shipCallbacks.onDragCanceled()
 
