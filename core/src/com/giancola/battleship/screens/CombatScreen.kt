@@ -3,14 +3,17 @@ package com.giancola.battleship.screens
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.math.MathUtils.random
 import com.badlogic.gdx.scenes.scene2d.ui.Image
-import com.giancola.battleship.*
-import com.giancola.battleship.GameConstants.N_COLS
-import com.giancola.battleship.GameConstants.N_ROWS
+import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.giancola.battleship.BattleshipGame
 import com.giancola.battleship.GameConstants.TILE_SIZE_SMALL
+import com.giancola.battleship.GraphicsConstants.feedbackBadColor
+import com.giancola.battleship.GraphicsConstants.feedbackGoodColor
+import com.giancola.battleship.GraphicsConstants.feedbackNeutralColor
 import com.giancola.battleship.GraphicsConstants.shipHealthyColor
-import com.giancola.battleship.GraphicsConstants.shipSunkColor
+import com.giancola.battleship.PlayerData
+import com.giancola.battleship.ShipId
+import com.giancola.battleship.ShotResult
 import com.giancola.battleship.actors.CombatEnemyBoard
 import com.giancola.battleship.actors.CombatPlayerBoard
 import com.giancola.battleship.actors.ShipActor
@@ -18,33 +21,54 @@ import com.giancola.battleship.gamelogic.GameLogic
 import com.giancola.battleship.gamelogic.GameLogicListener
 import com.giancola.battleship.gamelogic.LocalGameLogic
 import com.giancola.battleship.gamelogic.PlayerId
+import com.giancola.battleship.ui.CombatFeedbackLabel
+import com.giancola.battleship.ui.CombatTimeLabel
+import com.giancola.battleship.ui.CombatTurnLabel
 import ktx.app.KtxScreen
 
 
 class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : KtxScreen, InputAdapter(), GameLogicListener {
-    private val playerShipActors: Map<Pair<ShipType, Int>, ShipActor>
+    private val playerShipActors: Map<ShipId, ShipActor>
 
     private val bkg: Image
     private val playerBoard: CombatPlayerBoard
     private val enemyBoard: CombatEnemyBoard
 
+    private val feedbackLabel: Label
+    private val turnLabel: Label
+    private val timeLabel: Label
+
     val game: GameLogic = LocalGameLogic()
     val playerId: PlayerId
+    var moveTime: Float
 
     init {
+        val stage = gameApp.stg
+
         gameApp.im.addProcessor(this)
 
         bkg = Image(Texture("combat_background.png"))
-        gameApp.stg.addActor(bkg)
+        stage.addActor(bkg)
 
-        playerBoard = CombatPlayerBoard(this.gameApp.stg)
-        enemyBoard = CombatEnemyBoard(this, this.gameApp.stg)
+        playerBoard = CombatPlayerBoard(stage)
+        enemyBoard = CombatEnemyBoard(this, stage)
+
+        feedbackLabel = CombatFeedbackLabel(stage)
+        feedbackLabel.color = feedbackNeutralColor
+        feedbackLabel.setText("Waiting for game to start")
+        turnLabel = CombatTurnLabel(stage)
+        turnLabel.setText("...")
+        timeLabel = CombatTimeLabel(stage)
+        timeLabel.setText("")
+
 
         playerShipActors = initShips()
 
         val regPlayerId = game.registerListener(this, playerData)
         require (regPlayerId != null)
         playerId = regPlayerId
+
+        moveTime = 0f
 
         //randomEnemyShots() //DEBUG
 
@@ -53,6 +77,9 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
 
     override fun render(delta: Float) {
         gameApp.stg.act()
+
+        updateTime(delta)
+
         gameApp.stg.draw()
     }
 
@@ -62,10 +89,10 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
     }
 
 
-    private fun initShips(): Map<Pair<ShipType, Int>, ShipActor> {
-        val mutableMap = mutableMapOf<Pair<ShipType, Int>, ShipActor>()
+    private fun initShips(): Map<ShipId, ShipActor> {
+        val mutableMap = mutableMapOf<ShipId, ShipActor>()
 
-        val shipPlacements = playerData.shipPlacement
+        val shipPlacements = playerData.shipPlacements
         for ((shipId, shipCoords) in shipPlacements) {
             if (shipCoords == null)
                 continue
@@ -82,56 +109,30 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
         return mutableMap.toMap()
     }
 
-/*
-    private fun randomEnemyShots() {
-        val nShots = 20
-
-        var shotCount = 0
-        while (shotCount < nShots) {
-            val iRow = random(N_ROWS-1)
-            val iCol = random(N_COLS-1)
-
-            if (!enemyData.shots[iRow][iCol]) {
-                enemyShot(iRow, iCol)
-                shotCount ++
-            }
-        }
-    }
-
-    fun enemyShot(gridX: Int, gridY: Int) {
-        enemyData.shots[gridX][gridY] = true
-
-        val shotResult = playerData.checkEnemyShot(gridX, gridY)
-        if (shotResult.hit) {
-            playerBoard.tiles[gridX][gridY].setHit()
-            Gdx.app.log("Battleship", "Player ship hit: $gridX, $gridY !")
-        } else {
-            Gdx.app.log("Battleship", "Enemy shot missed")
-            playerBoard.tiles[gridX][gridY].setMissed()
-        }
-
-        if (shotResult.sunkShip != null) {
-            Gdx.app.log("Battleship","Player ship ${shotResult.sunkShip} sunk!!")
-            //playerShipActors[shotResult.sunkShip]?.color = shipSunkColor
-        }
-    }
-*/
-
 
     fun shoot(gridX: Int, gridY: Int) {
         val shotResult = game.shoot(playerId, gridX, gridY) ?: return
 
         if (shotResult.hit) {
             Gdx.app.log("Battleship", "Enemy ship hit: $gridX, $gridY !")
+            feedbackLabel.color = feedbackGoodColor
+            feedbackLabel.setText("Enemy ship hit !")
             enemyBoard.tiles[gridX][gridY].setHit()
         } else {
             Gdx.app.log("Battleship", "Player shot missed")
+            feedbackLabel.color = feedbackNeutralColor
+            feedbackLabel.setText("Shot missed")
             enemyBoard.tiles[gridX][gridY].setMissed()
         }
 
         if (shotResult.sunkShip != null) {
-            Gdx.app.log("Battleship","Enemy ship ${shotResult.sunkShip} sunk!!")
+            Gdx.app.log("Battleship","Enemy [${shotResult.sunkShip.shipType}] sunk !!")
+            feedbackLabel.color = feedbackGoodColor
+            feedbackLabel.setText("Enemy [${shotResult.sunkShip.shipType.name}] sunk !!")
         }
+
+        moveTime = 0f
+        turnLabel.setText("Enemy's turn")
     }
 
 
@@ -139,26 +140,58 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
     override fun onEnemyShot(gridX: Int, gridY: Int, shotResult: ShotResult) {
         if (shotResult.hit) {
             Gdx.app.log("Battleship", "Player ship hit: $gridX, $gridY !")
+            feedbackLabel.color = feedbackBadColor
+            feedbackLabel.setText("Player ship hit: $gridX, $gridY !")
             playerBoard.tiles[gridX][gridY].setHit()
         } else {
             Gdx.app.log("Battleship", "Enemy shot missed")
+            feedbackLabel.color = feedbackNeutralColor
+            feedbackLabel.setText("Enemy shot missed")
             playerBoard.tiles[gridX][gridY].setMissed()
         }
 
         if (shotResult.sunkShip != null) {
-            Gdx.app.log("Battleship","Player ship ${shotResult.sunkShip} sunk!!")
-            //playerShipActors[shotResult.sunkShip]?.color = shipSunkColor
+            Gdx.app.log("Battleship","Player ship ${shotResult.sunkShip.shipType} sunk!!")
+            feedbackLabel.color = feedbackBadColor
+            feedbackLabel.setText("Player ship sunk [${shotResult.sunkShip.shipType.name}] !!")
         }
+
+        moveTime = 0f
+        turnLabel.setText("Your turn")
     }
 
     override fun onGameStarted(whoseTurn: PlayerId) {
-        Gdx.app.log("Battleship", "Game started!")
+        val playerStr = when (whoseTurn) { playerId -> "Your"; else -> "Enemy's" }
+        Gdx.app.log("Battleship", "Game started - $playerStr turn")
+        feedbackLabel.color = feedbackNeutralColor
+        feedbackLabel.setText("Game started")
+
+        moveTime = 0f
+        turnLabel.setText("$playerStr turn")
     }
 
     override fun onGameFinished(winner: PlayerId) {
+        val playerStr = when (winner) { playerId -> "You"; else -> "Enemy" }
+        Gdx.app.log("Battleship", "Game finished - $playerStr won !")
+        feedbackLabel.color = if (winner == playerId) feedbackGoodColor else feedbackBadColor
+        feedbackLabel.setText("Game finished - $playerStr won !")
 
+        moveTime = 0f
+        turnLabel.setText("")
     }
 
     //--------------- end GameLogicListener methods ---------------
 
+
+    private fun updateTime(delta: Float) {
+        moveTime += delta
+
+        val seconds = moveTime.toInt() % 60
+        val minutes = moveTime.toInt() / 60
+
+        val secStr = ( if (seconds < 10 ) { "0" } else "" ) + seconds
+        val minStr = ( if (minutes < 10 ) { "0" } else "" ) + minutes
+
+        timeLabel.setText("move time: ${minStr}:${secStr}")
+    }
 }

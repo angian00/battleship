@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.GridPoint2
 import com.badlogic.gdx.math.MathUtils.random
 import com.giancola.battleship.PlayerData
 import com.giancola.battleship.ShipFactory
+import com.giancola.battleship.ShipPlacement
 import com.giancola.battleship.ShotResult
 
 class AIPlayer(private val game: GameLogic): GameLogicListener {
@@ -28,9 +29,9 @@ class AIPlayer(private val game: GameLogic): GameLogicListener {
         }
 
         private fun randomizePlacement(playerData: PlayerData) {
-            for ((gridX, shipId) in playerData.shipPlacement.keys.withIndex()) {
-                val shipLength = shipId.first.width
-                playerData.shipPlacement[shipId] = Pair(GridPoint2(gridX, 0), GridPoint2(gridX, shipLength-1))
+            for ((gridX, shipId) in playerData.shipPlacements.keys.withIndex()) {
+                val shipLength = shipId.shipType.width
+                playerData.shipPlacements[shipId] = ShipPlacement(GridPoint2(gridX, 0), GridPoint2(gridX, shipLength-1))
             }
         }
     }

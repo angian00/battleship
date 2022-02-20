@@ -6,20 +6,20 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.GridPoint2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.giancola.battleship.GameConstants.TILE_SIZE
-import com.giancola.battleship.ShipType
+import com.giancola.battleship.ShipId
+import com.giancola.battleship.ShipPlacement
 import java.util.*
 import kotlin.math.roundToInt
 
 
-open class ShipActor(val shipId: Pair<ShipType, Int>, private val tileSize: Float = TILE_SIZE): Actor() {
+open class ShipActor(val shipId: ShipId, private val tileSize: Float = TILE_SIZE): Actor() {
 
     private val texture: Texture
     private val textureRegion: TextureRegion
 
 
     init {
-        val shipType = shipId.first
-        val filename = "ship_${shipType.name.toLowerCase(Locale.US)}_${tileSize.roundToInt()}.png"
+        val filename = "ship_${shipId.shipType.name.toLowerCase(Locale.US)}_${tileSize.roundToInt()}.png"
         texture = Texture(filename)
         textureRegion = TextureRegion(texture)
 
@@ -50,11 +50,11 @@ open class ShipActor(val shipId: Pair<ShipType, Int>, private val tileSize: Floa
     }
 
 
-    fun placeInGrid(coords: Pair<GridPoint2, GridPoint2>, board: Actor) {
-        val gridXStart = coords.first.x
-        val gridYStart = coords.first.y
-        val gridXEnd = coords.second.x
-        val gridYEnd = coords.second.y
+    fun placeInGrid(shipPlacement: ShipPlacement, board: Actor) {
+        val gridXStart = shipPlacement.from.x
+        val gridYStart = shipPlacement.from.y
+        val gridXEnd = shipPlacement.to.x
+        val gridYEnd = shipPlacement.to.y
 
         val originAbsX = board.x + tileSize * (gridXStart + gridXEnd + 1) / 2f
         val originAbsY = board.y + tileSize * (gridYStart + gridYEnd + 1) / 2f

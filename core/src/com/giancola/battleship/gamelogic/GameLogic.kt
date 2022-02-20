@@ -89,12 +89,12 @@ class LocalGameLogic: GameLogic {
         playerTurn = if (random(2) == 1) PlayerId.Player1 else PlayerId.Player2
         gameStarted = true
 
-        sendStartGame()
+        sendStartGame(playerTurn)
     }
 
     //------------ async functions -----------
 
-    private fun sendStartGame() {
+    private fun sendStartGame(playerTurn: PlayerId) {
         Thread {
             randomSleep()
             Gdx.app.postRunnable {

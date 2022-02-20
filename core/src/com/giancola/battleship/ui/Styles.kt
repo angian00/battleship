@@ -6,18 +6,25 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.NinePatch
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 
 
 object Styles {
+    val labelStyle: LabelStyle
+    val labelStyleSmall: LabelStyle
     val buttonStyle: TextButton.TextButtonStyle
 
     init {
-        //val skin = Skin()
+        val font = generateFont(24)
+        val fontSmall = generateFont(18)
+
+        labelStyle = LabelStyle(font, Color.WHITE)
+        labelStyleSmall = LabelStyle(fontSmall, Color.WHITE)
 
         buttonStyle = TextButton.TextButtonStyle()
-        buttonStyle.font = generateFont()
+        buttonStyle.font = font
         buttonStyle.fontColor = Color.BLACK
 
         val buttonTexture = Texture("ui_button.png")
@@ -28,10 +35,10 @@ object Styles {
     }
 
 
-    private fun generateFont(): BitmapFont {
+    private fun generateFont(fontSize: Int): BitmapFont {
         val generator = FreeTypeFontGenerator(Gdx.files.internal("fonts/Charter.ttc"))
         val fontParam = FreeTypeFontGenerator.FreeTypeFontParameter()
-        fontParam.size = 24
+        fontParam.size = fontSize
         fontParam.minFilter = Texture.TextureFilter.Linear
         fontParam.magFilter = Texture.TextureFilter.Linear
 

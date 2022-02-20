@@ -2,6 +2,12 @@
 # Change Log
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [0.4] - 2022-02-
+
+### Modified
+- Refactored code introducing explicit ShipId and ShipPlacement types
+
+
 ## [0.3] - 2022-02-19
 ### Added
 - combat screen:

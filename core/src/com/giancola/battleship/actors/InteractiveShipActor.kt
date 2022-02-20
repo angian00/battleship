@@ -1,24 +1,17 @@
 package com.giancola.battleship.actors
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.GridPoint2
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.giancola.battleship.GameConstants.TILE_SIZE
 import com.giancola.battleship.GraphicsConstants
-import com.giancola.battleship.ShipType
+import com.giancola.battleship.ShipId
 import com.giancola.battleship.screens.PlacementScreen
 import ktx.actors.alpha
-import java.util.*
 import kotlin.math.roundToInt
 
 
-class InteractiveShipActor(private val screen: PlacementScreen, shipId: Pair<ShipType, Int>, tileSize: Float = TILE_SIZE): ShipActor(shipId, tileSize), ShipGestureListener.ShipGestureCallbacks {
+class InteractiveShipActor(private val screen: PlacementScreen, shipId: ShipId, tileSize: Float = TILE_SIZE): ShipActor(shipId, tileSize), ShipGestureListener.ShipGestureCallbacks {
     var validPlacement: Boolean? = null
         set(value) {
             field = value

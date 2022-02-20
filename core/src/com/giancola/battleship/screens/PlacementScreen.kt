@@ -23,7 +23,7 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
 
     private val bkg: Image
     val board: PlacementBoard
-    val ships: Map<Pair<ShipType, Int>, InteractiveShipActor>
+    val ships: Map<ShipId, InteractiveShipActor>
     private val confirmButton: TextButton
 
     init {
@@ -56,8 +56,8 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
         gameApp.stg.addActor(confirmButton)
 
 
-        val mutableMap = mutableMapOf<Pair<ShipType, Int>, InteractiveShipActor>()
-        for ((i, shipId) in this.playerData.shipPlacement.keys.withIndex()) {
+        val mutableMap = mutableMapOf<ShipId, InteractiveShipActor>()
+        for ((i, shipId) in this.playerData.shipPlacements.keys.withIndex()) {
             val shipActor = InteractiveShipActor(this, shipId)
 
             val shipRect = LayoutConstants.standard2worldCoords(LayoutConstants.placementShipPositions[i])
@@ -110,7 +110,7 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
             val iGridEnd = ((bbox.x + bbox.width - board.x) / TILE_SIZE).roundToInt() - 1
             val jGridEnd = ((bbox.y + bbox.height - board.y) / TILE_SIZE).roundToInt() - 1
 
-            playerData.shipPlacement[ship.shipId] = Pair(
+            playerData.shipPlacements[ship.shipId] = ShipPlacement(
                 GridPoint2(iGridStart, jGridStart),
                 GridPoint2(iGridEnd, jGridEnd)
             )

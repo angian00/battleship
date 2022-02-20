@@ -1,6 +1,5 @@
 package com.giancola.battleship
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.GridPoint2
 import com.giancola.battleship.GameConstants.N_COLS
 import com.giancola.battleship.GameConstants.N_ROWS
@@ -29,33 +28,35 @@ object ShipFactory {
     )
 }
 
+data class ShipId(val shipType: ShipType, val prog: Int)
+data class ShipPlacement(val from: GridPoint2, val to: GridPoint2)
 
-data class ShotResult(val hit: Boolean, val sunkShip: Pair<ShipType, Int>?)
+data class ShotResult(val hit: Boolean, val sunkShip: ShipId?)
 
 
 class PlayerData(val name: String, shipProvision: Map<ShipType, Int>, nRows: Int = N_ROWS, nCols: Int = N_COLS) {
     val shots: Array<Array<Boolean>>
     //val enemyShots: Array<Array<Boolean>>
-    val shipPlacement: MutableMap<Pair<ShipType, Int>, Pair<GridPoint2, GridPoint2>?>
+    val shipPlacements: MutableMap<ShipId, ShipPlacement?>
 
 
     init {
         this.shots = Array(nRows) { _ -> Array(nCols) { _ -> false } }
         //this.enemyShots = Array(nRows) { _ -> Array(nCols) { _ -> false } }
-        this.shipPlacement = mutableMapOf()
+        this.shipPlacements = mutableMapOf()
         for (shipEntry in shipProvision) {
             for (shipIndex in 0 until shipEntry.value) {
-                shipPlacement[Pair(shipEntry.key, shipIndex)] = null
+                shipPlacements[ShipId(shipEntry.key, shipIndex)] = null
             }
         }
     }
 
     fun checkEnemyShot(gridX: Int, gridY: Int, enemyShots: Array<Array<Boolean>>): ShotResult {
         var isHit = false
-        var sunkShip: Pair<ShipType, Int>? = null
+        var sunkShip: ShipId? = null
 
         enemyShots[gridX][gridY] = true
-        for (shipId in shipPlacement.keys) {
+        for (shipId in shipPlacements.keys) {
             if (isShipOnTile(shipId, gridX, gridY)) {
                 isHit = true
 
@@ -70,10 +71,10 @@ class PlayerData(val name: String, shipProvision: Map<ShipType, Int>, nRows: Int
     }
 
 
-    private fun isShipOnTile(shipId: Pair<ShipType, Int>, gridX: Int, gridY: Int): Boolean {
-        val shipPlace = shipPlacement[shipId] ?: return false
-        val startTile = shipPlace.first
-        val endTile = shipPlace.second
+    private fun isShipOnTile(shipId: ShipId, gridX: Int, gridY: Int): Boolean {
+        val shipPlacement = shipPlacements[shipId] ?: return false
+        val startTile = shipPlacement.from
+        val endTile = shipPlacement.to
 
         return if (startTile.x == endTile.x) {
             (gridX == startTile.x) && (gridY >= startTile.y) && (gridY <= endTile.y)
@@ -84,10 +85,10 @@ class PlayerData(val name: String, shipProvision: Map<ShipType, Int>, nRows: Int
     }
 
 
-    private fun isShipSunk(shipId: Pair<ShipType, Int>, enemyShots: Array<Array<Boolean>>): Boolean {
-        val shipPlace = shipPlacement[shipId] ?: return false
-        val startTile = shipPlace.first
-        val endTile = shipPlace.second
+    private fun isShipSunk(shipId: ShipId, enemyShots: Array<Array<Boolean>>): Boolean {
+        val shipPlacement = shipPlacements[shipId] ?: return false
+        val startTile = shipPlacement.from
+        val endTile = shipPlacement.to
 
         if (startTile.x == endTile.x) {
             for (y in startTile.y..endTile.y) {
