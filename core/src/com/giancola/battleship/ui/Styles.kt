@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
+import com.giancola.battleship.GraphicsConstants.FONT_SIZE
+import com.giancola.battleship.GraphicsConstants.FONT_SIZE_SMALL
 
 
 object Styles {
@@ -17,8 +19,8 @@ object Styles {
     val buttonStyle: TextButton.TextButtonStyle
 
     init {
-        val font = generateFont(24)
-        val fontSmall = generateFont(18)
+        val font = generateFont(FONT_SIZE)
+        val fontSmall = generateFont(FONT_SIZE_SMALL)
 
         labelStyle = LabelStyle(font, Color.WHITE)
         labelStyleSmall = LabelStyle(fontSmall, Color.WHITE)
@@ -32,6 +34,12 @@ object Styles {
         val buttonDrawable = NinePatchDrawable(ninePatch)
         buttonStyle.up = buttonDrawable
         buttonStyle.down = buttonDrawable
+
+        val buttonDisabledTexture = Texture("ui_button_disabled.png")
+        val disabledNinePatch = NinePatch(buttonDisabledTexture, 6, 6, 6, 6)
+        val buttonDisabledDrawable = NinePatchDrawable(disabledNinePatch)
+        buttonStyle.disabled = buttonDisabledDrawable
+        buttonStyle.disabledFontColor = Color.GRAY
     }
 
 

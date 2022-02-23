@@ -5,15 +5,16 @@ import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.giancola.battleship.BattleshipGame
+import ktx.app.KtxScreen
+
+import com.giancola.battleship.*
+import com.giancola.battleship.GameConstants.TILE_SIZE
 import com.giancola.battleship.GameConstants.TILE_SIZE_SMALL
+import com.giancola.battleship.GraphicsConstants.enemyShipColor
 import com.giancola.battleship.GraphicsConstants.feedbackBadColor
 import com.giancola.battleship.GraphicsConstants.feedbackGoodColor
 import com.giancola.battleship.GraphicsConstants.feedbackNeutralColor
-import com.giancola.battleship.GraphicsConstants.shipHealthyColor
-import com.giancola.battleship.PlayerData
-import com.giancola.battleship.ShipId
-import com.giancola.battleship.ShotResult
+import com.giancola.battleship.GraphicsConstants.playerShipColor
 import com.giancola.battleship.actors.CombatEnemyBoard
 import com.giancola.battleship.actors.CombatPlayerBoard
 import com.giancola.battleship.actors.ShipActor
@@ -24,11 +25,14 @@ import com.giancola.battleship.gamelogic.PlayerId
 import com.giancola.battleship.ui.CombatFeedbackLabel
 import com.giancola.battleship.ui.CombatTimeLabel
 import com.giancola.battleship.ui.CombatTurnLabel
-import ktx.app.KtxScreen
+import com.giancola.battleship.coords2str
+
+
 
 
 class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : KtxScreen, InputAdapter(), GameLogicListener {
     private val playerShipActors: Map<ShipId, ShipActor>
+    private val enemyShipActors: MutableMap<ShipId, ShipActor> = mutableMapOf()
 
     private val bkg: Image
     private val playerBoard: CombatPlayerBoard
@@ -100,7 +104,7 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
             val shipActor = ShipActor(shipId, TILE_SIZE_SMALL)
             shipActor.placeInGrid(shipCoords, playerBoard)
 
-            shipActor.color = shipHealthyColor
+            shipActor.color = playerShipColor
             gameApp.stg.addActor(shipActor)
 
             mutableMap[shipId] = shipActor
@@ -109,26 +113,48 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
         return mutableMap.toMap()
     }
 
+    private fun addEnemyShip(shipId: ShipId, placement: ShipPlacement) {
+        val shipActor = ShipActor(shipId, TILE_SIZE)
+        shipActor.placeInGrid(placement, enemyBoard)
+
+        shipActor.color = enemyShipColor
+        gameApp.stg.addActor(shipActor)
+        shipActor.zIndex = bkg.zIndex + 1
+        enemyShipActors[shipId] = shipActor
+    }
+
 
     fun shoot(gridX: Int, gridY: Int) {
         val shotResult = game.shoot(playerId, gridX, gridY) ?: return
 
         if (shotResult.hit) {
-            Gdx.app.log("Battleship", "Enemy ship hit: $gridX, $gridY !")
+            Gdx.app.log("Battleship", "[${coords2str(gridX, gridY)}] Enemy ship hit !")
             feedbackLabel.color = feedbackGoodColor
-            feedbackLabel.setText("Enemy ship hit !")
+            feedbackLabel.setText("[${coords2str(gridX, gridY)}] Enemy ship hit !")
             enemyBoard.tiles[gridX][gridY].setHit()
+            Sounds.hit.play()
+
         } else {
-            Gdx.app.log("Battleship", "Player shot missed")
+            Gdx.app.log("Battleship", "[${coords2str(gridX, gridY)}] Player shot missed")
             feedbackLabel.color = feedbackNeutralColor
-            feedbackLabel.setText("Shot missed")
+            feedbackLabel.setText("[${coords2str(gridX, gridY)}] Shot missed")
             enemyBoard.tiles[gridX][gridY].setMissed()
+            Sounds.miss.play()
         }
 
-        if (shotResult.sunkShip != null) {
-            Gdx.app.log("Battleship","Enemy [${shotResult.sunkShip.shipType}] sunk !!")
+        if (shotResult.sunkShipId != null) {
+            Gdx.app.log("Battleship","[${coords2str(gridX, gridY)}] Enemy [${shotResult.sunkShipId.shipType}] sunk !!")
             feedbackLabel.color = feedbackGoodColor
-            feedbackLabel.setText("Enemy [${shotResult.sunkShip.shipType.name}] sunk !!")
+            feedbackLabel.setText("[${coords2str(gridX, gridY)}] Enemy [${shotResult.sunkShipId.shipType.name}] sunk !!")
+            Sounds.sink.play()
+
+            addEnemyShip(shotResult.sunkShipId, shotResult.sunkShipPlacement!!)
+            /*
+            for (tileRow in enemyBoard.tiles) {
+                for (tile in tileRow)
+                    tile.toFront()
+            }
+            */
         }
 
         moveTime = 0f
@@ -139,21 +165,25 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
     //--------------- GameLogicListener methods ---------------
     override fun onEnemyShot(gridX: Int, gridY: Int, shotResult: ShotResult) {
         if (shotResult.hit) {
-            Gdx.app.log("Battleship", "Player ship hit: $gridX, $gridY !")
+            Gdx.app.log("Battleship", "[${coords2str(gridX, gridY)}] Player ship hit !")
             feedbackLabel.color = feedbackBadColor
-            feedbackLabel.setText("Player ship hit: $gridX, $gridY !")
+            feedbackLabel.setText("[${coords2str(gridX, gridY)}] Player ship hit !")
             playerBoard.tiles[gridX][gridY].setHit()
+            Sounds.hit.play()
+
         } else {
-            Gdx.app.log("Battleship", "Enemy shot missed")
+            Gdx.app.log("Battleship", "[${coords2str(gridX, gridY)}] Enemy shot missed")
             feedbackLabel.color = feedbackNeutralColor
-            feedbackLabel.setText("Enemy shot missed")
+            feedbackLabel.setText("[${coords2str(gridX, gridY)}] Enemy shot missed")
             playerBoard.tiles[gridX][gridY].setMissed()
+            Sounds.miss.play()
         }
 
-        if (shotResult.sunkShip != null) {
-            Gdx.app.log("Battleship","Player ship ${shotResult.sunkShip.shipType} sunk!!")
+        if (shotResult.sunkShipId != null) {
+            Gdx.app.log("Battleship","[${coords2str(gridX, gridY)}] Player ship ${shotResult.sunkShipId.shipType} sunk!!")
             feedbackLabel.color = feedbackBadColor
-            feedbackLabel.setText("Player ship sunk [${shotResult.sunkShip.shipType.name}] !!")
+            feedbackLabel.setText("[${coords2str(gridX, gridY)}] Player ship sunk [${shotResult.sunkShipId.shipType.name}] !!")
+            Sounds.sink.play()
         }
 
         moveTime = 0f

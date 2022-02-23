@@ -51,8 +51,7 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
 
             dispose()
         }
-        //confirmButton.isDisabled = true  //DEBUG
-        //confirmButton.isVisible = false
+        confirmButton.isDisabled = true
         gameApp.stg.addActor(confirmButton)
 
 
@@ -98,8 +97,7 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
         }
 
         //enable confirm button if everything ship is placed
-        //screen.confirmButton.isDisabled = !allValid
-        //confirmButton.isVisible = allValid
+        confirmButton.isDisabled = !allValid
     }
 
     private fun updatePlayerData() {

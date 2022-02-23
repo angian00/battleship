@@ -31,7 +31,7 @@ object ShipFactory {
 data class ShipId(val shipType: ShipType, val prog: Int)
 data class ShipPlacement(val from: GridPoint2, val to: GridPoint2)
 
-data class ShotResult(val hit: Boolean, val sunkShip: ShipId?)
+data class ShotResult(val hit: Boolean, val sunkShipId: ShipId?, val sunkShipPlacement: ShipPlacement?)
 
 
 class PlayerData(val name: String, shipProvision: Map<ShipType, Int>, nRows: Int = N_ROWS, nCols: Int = N_COLS) {
@@ -53,22 +53,27 @@ class PlayerData(val name: String, shipProvision: Map<ShipType, Int>, nRows: Int
 
     fun checkEnemyShot(gridX: Int, gridY: Int, enemyShots: Array<Array<Boolean>>): ShotResult {
         var isHit = false
-        var sunkShip: ShipId? = null
+        var sunkShipId: ShipId? = null
+        var sunkShipPlacement: ShipPlacement? = null
 
         enemyShots[gridX][gridY] = true
         for (shipId in shipPlacements.keys) {
             if (isShipOnTile(shipId, gridX, gridY)) {
                 isHit = true
 
-                if (isShipSunk(shipId, enemyShots))
-                    sunkShip = shipId
+                if (isShipSunk(shipId, enemyShots)) {
+                    sunkShipId = shipId
+                    sunkShipPlacement = shipPlacements[shipId]
+                }
 
                 break
             }
         }
 
-        return ShotResult(isHit, sunkShip)
+        return ShotResult(isHit, sunkShipId, sunkShipPlacement)
     }
+
+    fun areAllShipsSunk(enemyShots: Array<Array<Boolean>>) = shipPlacements.keys.all { shipId -> isShipSunk(shipId, enemyShots) }
 
 
     private fun isShipOnTile(shipId: ShipId, gridX: Int, gridY: Int): Boolean {
@@ -107,7 +112,6 @@ class PlayerData(val name: String, shipProvision: Map<ShipType, Int>, nRows: Int
 
             return true
         }
-
     }
 
 }

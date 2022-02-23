@@ -2,7 +2,14 @@
 # Change Log
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [0.4] - 2022-02-
+## [0.4] - 2022-02-23
+
+### Added
+- Sound effects
+- text messages after shots
+- disabled state for placement confirm button
+- winning condition
+- showing sunk enemy ships
 
 ### Modified
 - Refactored code introducing explicit ShipId and ShipPlacement types

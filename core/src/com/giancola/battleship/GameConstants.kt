@@ -48,15 +48,12 @@ object LayoutConstants {
 
 object GraphicsConstants {
     const val movementAnimDuration = 0.25f
-    const val messageFadeOutDuration = 2.0f
 
-    val shipHealthyColor: Color = Color.GREEN
-    val shipDamagedColor: Color = Color.ORANGE
-    val shipSunkColor: Color = Color.RED
+    val playerShipColor: Color = Color.GREEN
+    val enemyShipColor: Color = Color.BLUE
 
-    const val combatFeedbackSize = 18
-    const val combatTurnSize = 24
-    const val combatTimeSize = 18
+    const val FONT_SIZE = 24
+    const val FONT_SIZE_SMALL = 18
 
     val feedbackGoodColor: Color = Color.GREEN
     val feedbackNeutralColor: Color = Color.DARK_GRAY

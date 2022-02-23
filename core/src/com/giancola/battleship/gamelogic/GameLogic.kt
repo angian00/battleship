@@ -14,7 +14,7 @@ enum class PlayerId {
 }
 
 interface GameLogic {
-    var gameStarted: Boolean
+    var gameRunning: Boolean
     var playerTurn: PlayerId
 
 
@@ -31,7 +31,7 @@ interface GameLogicListener {
 
 
 class LocalGameLogic: GameLogic {
-    override var gameStarted: Boolean = false
+    override var gameRunning: Boolean = false
     override var playerTurn: PlayerId = PlayerId.Player1
 
     private var playerListeners: MutableMap<PlayerId, GameLogicListener> = mutableMapOf()
@@ -62,7 +62,7 @@ class LocalGameLogic: GameLogic {
 
 
     override fun shoot(playerId: PlayerId, gridX: Int, gridY: Int): ShotResult? {
-        if (!gameStarted)
+        if (!gameRunning)
             return null
 
         if (playerTurn != playerId)
@@ -82,24 +82,43 @@ class LocalGameLogic: GameLogic {
         val shotResult = enemyData.checkEnemyShot(gridX, gridY, currPlayerData.shots)
         sendEnemyShot(playerTurn, gridX, gridY, shotResult)
 
+        if (enemyData.areAllShipsSunk(currPlayerData.shots)) {
+            gameRunning = false
+            sendGameFinished(playerTurn.otherPlayer)
+        }
+
         return shotResult
     }
 
     private fun startGame() {
         playerTurn = if (random(2) == 1) PlayerId.Player1 else PlayerId.Player2
-        gameStarted = true
+        gameRunning = true
 
-        sendStartGame(playerTurn)
+        sendGameStarted(playerTurn)
     }
 
     //------------ async functions -----------
 
-    private fun sendStartGame(playerTurn: PlayerId) {
+    private fun sendGameStarted(playerTurn: PlayerId) {
         Thread {
             randomSleep()
             Gdx.app.postRunnable {
                 for (listener in playerListeners.values)
                     listener.onGameStarted(playerTurn)
+            }
+
+        }.start()
+    }
+
+    private fun sendGameFinished(winner: PlayerId) {
+        Thread {
+            //double sleep to prevent race condition wiith sendEnemyShot
+            randomSleep()
+            randomSleep()
+
+            Gdx.app.postRunnable {
+                for (listener in playerListeners.values)
+                    listener.onGameFinished(winner)
             }
 
         }.start()
