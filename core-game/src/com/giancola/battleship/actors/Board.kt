@@ -12,7 +12,7 @@ import com.giancola.battleship.screens.CombatScreen
 import ktx.actors.onClick
 
 
-open abstract class Board(stage: Stage, val boardLayout: Rectangle, val tileSize: Float, val nRows: Int, val nCols: Int): Group() {
+abstract class Board(stage: Stage, val boardLayout: Rectangle, val tileSize: Float, val nRows: Int, val nCols: Int): Group() {
 
     val tiles: Array<Array<Tile>>
 

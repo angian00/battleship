@@ -25,6 +25,8 @@ dependencies {
 }
 
 sourceSets.main.java.srcDirs = ['src/']
+sourceSets.main.resources.srcDirs = ['resources/']
+
 buildscript {
     repositories {
         mavenCentral()
@@ -36,5 +38,11 @@ repositories {
 }
 
 dependencies {
+    implementation project(':common')
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+    implementation("io.ktor:ktor-client-websockets:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation "ch.qos.logback:logback-classic:$logbackVersion"
+
 }

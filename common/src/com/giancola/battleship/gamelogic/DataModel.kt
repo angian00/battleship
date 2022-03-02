@@ -1,9 +1,8 @@
-package com.giancola.battleship
+package com.giancola.battleship.gamelogic
 
-import com.badlogic.gdx.math.GridPoint2
-import com.giancola.battleship.GameConstants.N_COLS
-import com.giancola.battleship.GameConstants.N_ROWS
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ShipType(val name: String, val width: Int, val height: Int)
 
 val Carrier = ShipType("Carrier", 5, 1)
@@ -28,25 +27,32 @@ object ShipFactory {
     )
 }
 
-data class ShipId(val shipType: ShipType, val prog: Int)
-data class ShipPlacement(val from: GridPoint2, val to: GridPoint2)
+@Serializable
+data class Coords(val x: Int, val y: Int)
 
+@Serializable
+data class ShipId(val shipType: ShipType, val prog: Int)
+
+@Serializable
+data class ShipPlacement(val from: Coords, val to: Coords)
+
+@Serializable
 data class ShotResult(val hit: Boolean, val sunkShipId: ShipId?, val sunkShipPlacement: ShipPlacement?)
 
 
-class PlayerData(val name: String, shipProvision: Map<ShipType, Int>, nRows: Int = N_ROWS, nCols: Int = N_COLS) {
-    val shots: Array<Array<Boolean>>
-    //val enemyShots: Array<Array<Boolean>>
-    val shipPlacements: MutableMap<ShipId, ShipPlacement?>
+@Serializable
+class PlayerData(val name: String, private val shipProvision: Map<ShipType, Int>, private val nRows: Int, private val nCols: Int) {
+    val shots: Array<Array<Boolean>> = Array(nRows) { _ -> Array(nCols) { _ -> false } }
+    val shipPlacements: MutableMap<ShipId, ShipPlacement?> = mutableMapOf()
 
 
     init {
-        this.shots = Array(nRows) { _ -> Array(nCols) { _ -> false } }
-        //this.enemyShots = Array(nRows) { _ -> Array(nCols) { _ -> false } }
-        this.shipPlacements = mutableMapOf()
         for (shipEntry in shipProvision) {
             for (shipIndex in 0 until shipEntry.value) {
-                shipPlacements[ShipId(shipEntry.key, shipIndex)] = null
+                val key = ShipId(shipEntry.key, shipIndex)
+                //shipPlacements can already be assigned if de-serializing
+                if (key !in shipPlacements)
+                    shipPlacements[key] = null
             }
         }
     }
@@ -114,6 +120,41 @@ class PlayerData(val name: String, shipProvision: Map<ShipType, Int>, nRows: Int
         }
     }
 
+
+    override fun toString(): String {
+        val sb = StringBuilder()
+
+        sb.append("player [$name]\n")
+/*
+        sb.append("\t shipProvision: \n")
+        for ((shipType, quantity) in shipProvision) {
+            sb.append("\t\t ")
+                .append(shipType.toString())
+                .append(": ")
+                .append(quantity)
+                .append("\n")
+        }
+        sb.append("\n")
+*/
+        sb.append("\t shipPlacements: \n")
+        for ((shipId, shipPlacement) in shipPlacements.entries) {
+            sb.append("\t\t ")
+                .append(shipId.toString())
+                .append(": ")
+
+            if (shipPlacement == null) {
+                sb.append("<null> ")
+            } else {
+                sb.append(shipPlacement.from)
+                    .append(" --> ")
+                    .append(shipPlacement.to)
+            }
+                .append("\n")
+        }
+        sb.append("\n")
+
+        return sb.toString()
+    }
 }
 
 data class GameData(val player1: PlayerData, val player2: PlayerData, val turnPlayer1: Boolean = true)

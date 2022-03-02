@@ -1,0 +1,24 @@
+apply plugin: 'kotlin'
+
+sourceCompatibility = 1.6
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+}
+
+sourceSets.main.java.srcDirs = ['src/']
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+}

@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.giancola.battleship.GameConstants.TILE_SIZE
 import com.giancola.battleship.GraphicsConstants
-import com.giancola.battleship.ShipId
+import com.giancola.battleship.gamelogic.ShipId
 import com.giancola.battleship.screens.PlacementScreen
 import ktx.actors.alpha
 import kotlin.math.roundToInt

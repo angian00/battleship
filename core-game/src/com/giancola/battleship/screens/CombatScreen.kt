@@ -5,9 +5,7 @@ import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import ktx.app.KtxScreen
-
-import com.giancola.battleship.*
+import com.giancola.battleship.BattleshipGame
 import com.giancola.battleship.GameConstants.TILE_SIZE
 import com.giancola.battleship.GameConstants.TILE_SIZE_SMALL
 import com.giancola.battleship.GraphicsConstants.enemyShipColor
@@ -15,22 +13,21 @@ import com.giancola.battleship.GraphicsConstants.feedbackBadColor
 import com.giancola.battleship.GraphicsConstants.feedbackGoodColor
 import com.giancola.battleship.GraphicsConstants.feedbackNeutralColor
 import com.giancola.battleship.GraphicsConstants.playerShipColor
+import com.giancola.battleship.Sounds
 import com.giancola.battleship.actors.CombatEnemyBoard
 import com.giancola.battleship.actors.CombatPlayerBoard
 import com.giancola.battleship.actors.ShipActor
-import com.giancola.battleship.gamelogic.GameLogic
-import com.giancola.battleship.gamelogic.GameLogicListener
-import com.giancola.battleship.gamelogic.LocalGameLogic
-import com.giancola.battleship.gamelogic.PlayerId
+import com.giancola.battleship.coords2str
+import com.giancola.battleship.gamelogic.*
+import com.giancola.battleship.net.RemoteClient
 import com.giancola.battleship.ui.CombatFeedbackLabel
 import com.giancola.battleship.ui.CombatTimeLabel
 import com.giancola.battleship.ui.CombatTurnLabel
-import com.giancola.battleship.coords2str
+import ktx.app.KtxScreen
 
 
-
-
-class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : KtxScreen, InputAdapter(), GameLogicListener {
+//class CombatScreen(val gameApp: BattleshipGame, val gameLogic: LocalGameLogic, val playerData: PlayerData) : KtxScreen, InputAdapter(), GameLogicListener {
+class CombatScreen(val gameApp: BattleshipGame, val client: RemoteClient, val playerData: PlayerData) : KtxScreen, InputAdapter(), GameLogicListener {
     private val playerShipActors: Map<ShipId, ShipActor>
     private val enemyShipActors: MutableMap<ShipId, ShipActor> = mutableMapOf()
 
@@ -42,8 +39,8 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
     private val turnLabel: Label
     private val timeLabel: Label
 
-    val game: GameLogic = LocalGameLogic()
-    val playerId: PlayerId
+    //val gameLogic = LocalGameLogic()
+    var playerId: PlayerId? = null
     var moveTime: Float
 
     init {
@@ -68,13 +65,14 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
 
         playerShipActors = initShips()
 
-        val regPlayerId = game.registerListener(this, playerData)
-        require (regPlayerId != null)
-        playerId = regPlayerId
+        client.localListener = this
+        client.sendLogin()
+        //val reqPlayerId = gameLogic.registerListener(this)
+        //require(reqPlayerId != null)
+        //this.playerId = reqPlayerId
+        //gameLogic.setPlacement(playerId, playerData)
 
         moveTime = 0f
-
-        //randomEnemyShots() //DEBUG
 
         bkg.toBack()
     }
@@ -125,7 +123,14 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
 
 
     fun shoot(gridX: Int, gridY: Int) {
-        val shotResult = game.shoot(playerId, gridX, gridY) ?: return
+        //gameLogic.shoot(playerId, gridX, gridY)
+        client.sendShoot(gridX, gridY)
+    }
+
+    private fun playerShot(gridX: Int, gridY: Int, shotResult: ShotResult?) {
+        if (shotResult == null) {
+            return
+        }
 
         if (shotResult.hit) {
             Gdx.app.log("Battleship", "[${coords2str(gridX, gridY)}] Enemy ship hit !")
@@ -143,12 +148,13 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
         }
 
         if (shotResult.sunkShipId != null) {
-            Gdx.app.log("Battleship","[${coords2str(gridX, gridY)}] Enemy [${shotResult.sunkShipId.shipType}] sunk !!")
+            val sunkShipId = shotResult.sunkShipId!!
+            Gdx.app.log("Battleship","[${coords2str(gridX, gridY)}] Enemy [${sunkShipId.shipType}] sunk !!")
             feedbackLabel.color = feedbackGoodColor
-            feedbackLabel.setText("[${coords2str(gridX, gridY)}] Enemy [${shotResult.sunkShipId.shipType.name}] sunk !!")
+            feedbackLabel.setText("[${coords2str(gridX, gridY)}] Enemy [${sunkShipId.shipType.name}] sunk !!")
             Sounds.sink.play()
 
-            addEnemyShip(shotResult.sunkShipId, shotResult.sunkShipPlacement!!)
+            addEnemyShip(sunkShipId, shotResult.sunkShipPlacement!!)
             /*
             for (tileRow in enemyBoard.tiles) {
                 for (tile in tileRow)
@@ -162,8 +168,10 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
     }
 
 
-    //--------------- GameLogicListener methods ---------------
-    override fun onEnemyShot(gridX: Int, gridY: Int, shotResult: ShotResult) {
+    private fun enemyShot(gridX: Int, gridY: Int, shotResult: ShotResult?) {
+        if (shotResult == null)
+            return
+
         if (shotResult.hit) {
             Gdx.app.log("Battleship", "[${coords2str(gridX, gridY)}] Player ship hit !")
             feedbackLabel.color = feedbackBadColor
@@ -180,9 +188,10 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
         }
 
         if (shotResult.sunkShipId != null) {
-            Gdx.app.log("Battleship","[${coords2str(gridX, gridY)}] Player ship ${shotResult.sunkShipId.shipType} sunk!!")
+            val sunkShipId = shotResult.sunkShipId!!
+            Gdx.app.log("Battleship","[${coords2str(gridX, gridY)}] Player ship ${sunkShipId.shipType} sunk!!")
             feedbackLabel.color = feedbackBadColor
-            feedbackLabel.setText("[${coords2str(gridX, gridY)}] Player ship sunk [${shotResult.sunkShipId.shipType.name}] !!")
+            feedbackLabel.setText("[${coords2str(gridX, gridY)}] Player ship sunk [${sunkShipId.shipType.name}] !!")
             Sounds.sink.play()
         }
 
@@ -190,11 +199,28 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
         turnLabel.setText("Your turn")
     }
 
-    override fun onGameStarted(whoseTurn: PlayerId) {
-        val playerStr = when (whoseTurn) { playerId -> "Your"; else -> "Enemy's" }
-        Gdx.app.log("Battleship", "Game started - $playerStr turn")
+
+    //--------------- GameLogicListener methods ---------------
+    override fun onGameStarting(playerId: PlayerId) {
+        Gdx.app.log("Battleship", "Game starting, I am $playerId")
+        this.playerId = playerId
+    }
+
+    override fun onGameStarted() {
+        Gdx.app.log("Battleship", "Game started")
         feedbackLabel.color = feedbackNeutralColor
         feedbackLabel.setText("Game started")
+
+        client.sendSetPlacement(playerData)
+
+        moveTime = 0f
+    }
+
+    override fun onCombatStarted(whoseTurn: PlayerId) {
+        val playerStr = when (whoseTurn) { playerId -> "Your"; else -> "Enemy's" }
+        Gdx.app.log("Battleship", "Combat started - $playerStr turn")
+        feedbackLabel.color = feedbackNeutralColor
+        feedbackLabel.setText("Combat started")
 
         moveTime = 0f
         turnLabel.setText("$playerStr turn")
@@ -208,6 +234,14 @@ class CombatScreen(val gameApp: BattleshipGame, val playerData: PlayerData) : Kt
 
         moveTime = 0f
         turnLabel.setText("")
+    }
+
+
+    override fun onShot(shooter: PlayerId, gridX: Int, gridY: Int, shotResult: ShotResult?) {
+        if (shooter == playerId)
+            playerShot(gridX, gridY, shotResult)
+        else
+            enemyShot(gridX, gridY, shotResult)
     }
 
     //--------------- end GameLogicListener methods ---------------

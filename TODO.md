@@ -1,9 +1,13 @@
 # TODO
 
+- set name in login
+- synchronize properly
+- check ai is still working
+
+- get hostname, port from configuration  
+
 ## v0.5:
   - server interaction
-      - client-side code
-      - server-side code
       - matchmaking ui
       - profile creation ui
 

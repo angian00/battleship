@@ -1,1 +1,2 @@
-include 'desktop', 'android', 'core'
+include 'desktop', 'android', 'server', 'core-game', 'common'
+enableFeaturePreview 'GRADLE_METADATA'

@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.GridPoint2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.giancola.battleship.GameConstants.TILE_SIZE
-import com.giancola.battleship.ShipId
-import com.giancola.battleship.ShipPlacement
+import com.giancola.battleship.gamelogic.ShipId
+import com.giancola.battleship.gamelogic.ShipPlacement
 import java.util.*
 import kotlin.math.roundToInt
 

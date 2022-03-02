@@ -3,15 +3,19 @@ package com.giancola.battleship.screens
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.math.GridPoint2
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
-import com.giancola.battleship.*
+import com.giancola.battleship.BattleshipGame
+import com.giancola.battleship.gamelogic.*
+import com.giancola.battleship.GameConstants.N_COLS
+import com.giancola.battleship.GameConstants.N_ROWS
 import com.giancola.battleship.GameConstants.TILE_SIZE
+import com.giancola.battleship.LayoutConstants
 import com.giancola.battleship.actors.InteractiveShipActor
 import com.giancola.battleship.actors.PlacementBoard
 import com.giancola.battleship.actors.getBoundingBox
 import com.giancola.battleship.actors.overlaps
+import com.giancola.battleship.net.RemoteClient
 import com.giancola.battleship.ui.Styles
 import ktx.actors.onClick
 import ktx.app.KtxScreen
@@ -19,7 +23,7 @@ import kotlin.math.roundToInt
 
 
 class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAdapter() {
-    private val playerData = PlayerData("Guerino", ShipFactory.standardSetup)
+    private val playerData = PlayerData("Guerino", ShipFactory.standardSetup, N_ROWS, N_COLS)
 
     private val bkg: Image
     val board: PlacementBoard
@@ -45,7 +49,11 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
 
             gameApp.stg.clear()
 
-            val combatScreen = CombatScreen(gameApp, playerData)
+            //val gameLogic = LocalGameLogic()
+            //val combatScreen = CombatScreen(gameApp, gameLogic, playerData)
+            val client = RemoteClient("localhost", 8080) //TODO: get from configuration
+            val combatScreen = CombatScreen(gameApp, client, playerData)
+
             gameApp.addScreen(combatScreen)
             gameApp.setScreen<CombatScreen>()
 
@@ -109,8 +117,8 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
             val jGridEnd = ((bbox.y + bbox.height - board.y) / TILE_SIZE).roundToInt() - 1
 
             playerData.shipPlacements[ship.shipId] = ShipPlacement(
-                GridPoint2(iGridStart, jGridStart),
-                GridPoint2(iGridEnd, jGridEnd)
+                Coords(iGridStart, jGridStart),
+                Coords(iGridEnd, jGridEnd)
             )
         }
     }
