@@ -1,16 +1,15 @@
 # TODO
 
-- set name in login
-- synchronize properly
-- check ai is still working
+- splash screen image
+- add player names to combat ui (and placement ui?)
 
+- troubleshooting server: connessioni >2 client
+- check ai is still working
 - get hostname, port from configuration  
 
-## v0.5:
-  - server interaction
-      - matchmaking ui
-      - profile creation ui
+? synchronize properly
 
+## v0.5:
 
 - android:
   - verify apk

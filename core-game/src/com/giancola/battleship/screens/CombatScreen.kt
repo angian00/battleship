@@ -26,8 +26,9 @@ import com.giancola.battleship.ui.CombatTurnLabel
 import ktx.app.KtxScreen
 
 
-//class CombatScreen(val gameApp: BattleshipGame, val gameLogic: LocalGameLogic, val playerData: PlayerData) : KtxScreen, InputAdapter(), GameLogicListener {
-class CombatScreen(val gameApp: BattleshipGame, val client: RemoteClient, val playerData: PlayerData) : KtxScreen, InputAdapter(), GameLogicListener {
+class CombatScreen(private val gameApp: BattleshipGame, private val client: RemoteClient,
+                   private val playerData: PlayerData, private val playerId: PlayerId, startTurn: PlayerId) : KtxScreen, InputAdapter(), GameLogicListener {
+
     private val playerShipActors: Map<ShipId, ShipActor>
     private val enemyShipActors: MutableMap<ShipId, ShipActor> = mutableMapOf()
 
@@ -39,8 +40,6 @@ class CombatScreen(val gameApp: BattleshipGame, val client: RemoteClient, val pl
     private val turnLabel: Label
     private val timeLabel: Label
 
-    //val gameLogic = LocalGameLogic()
-    var playerId: PlayerId? = null
     var moveTime: Float
 
     init {
@@ -55,22 +54,12 @@ class CombatScreen(val gameApp: BattleshipGame, val client: RemoteClient, val pl
         enemyBoard = CombatEnemyBoard(this, stage)
 
         feedbackLabel = CombatFeedbackLabel(stage)
-        feedbackLabel.color = feedbackNeutralColor
-        feedbackLabel.setText("Waiting for game to start")
         turnLabel = CombatTurnLabel(stage)
-        turnLabel.setText("...")
         timeLabel = CombatTimeLabel(stage)
-        timeLabel.setText("")
 
+        initLabels(startTurn)
 
         playerShipActors = initShips()
-
-        client.localListener = this
-        client.sendLogin()
-        //val reqPlayerId = gameLogic.registerListener(this)
-        //require(reqPlayerId != null)
-        //this.playerId = reqPlayerId
-        //gameLogic.setPlacement(playerId, playerData)
 
         moveTime = 0f
 
@@ -79,9 +68,7 @@ class CombatScreen(val gameApp: BattleshipGame, val client: RemoteClient, val pl
 
     override fun render(delta: Float) {
         gameApp.stg.act()
-
         updateTime(delta)
-
         gameApp.stg.draw()
     }
 
@@ -200,24 +187,10 @@ class CombatScreen(val gameApp: BattleshipGame, val client: RemoteClient, val pl
     }
 
 
-    //--------------- GameLogicListener methods ---------------
-    override fun onGameStarting(playerId: PlayerId) {
-        Gdx.app.log("Battleship", "Game starting, I am $playerId")
-        this.playerId = playerId
-    }
-
-    override fun onGameStarted() {
-        Gdx.app.log("Battleship", "Game started")
-        feedbackLabel.color = feedbackNeutralColor
-        feedbackLabel.setText("Game started")
-
-        client.sendSetPlacement(playerData)
-
-        moveTime = 0f
-    }
-
-    override fun onCombatStarted(whoseTurn: PlayerId) {
-        val playerStr = when (whoseTurn) { playerId -> "Your"; else -> "Enemy's" }
+    private fun initLabels(whoseTurn: PlayerId) {
+        val playerStr = when (whoseTurn) {
+            playerId -> "Your"; else -> "Enemy's"
+        }
         Gdx.app.log("Battleship", "Combat started - $playerStr turn")
         feedbackLabel.color = feedbackNeutralColor
         feedbackLabel.setText("Combat started")
@@ -225,6 +198,12 @@ class CombatScreen(val gameApp: BattleshipGame, val client: RemoteClient, val pl
         moveTime = 0f
         turnLabel.setText("$playerStr turn")
     }
+
+    //--------------- GameLogicListener methods ---------------
+    override fun onGameStarting(playerId: PlayerId) {}
+    override fun onGameStarted() {}
+
+    override fun onCombatStarted(whoseTurn: PlayerId) {}
 
     override fun onGameFinished(winner: PlayerId) {
         val playerStr = when (winner) { playerId -> "You"; else -> "Enemy" }

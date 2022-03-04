@@ -2,10 +2,11 @@
 # Change Log
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [0.5] - 2022-02-
+## [0.5] - 2022-03-04
 
 ### Added
 - websocket server and client code
+- login ui
 
 ### Modified
 - Refactored code to split common/ and core-game/ modules

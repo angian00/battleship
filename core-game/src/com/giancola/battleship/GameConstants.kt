@@ -17,6 +17,11 @@ object GameConstants {
 
 
 object LayoutConstants {
+    val loginTextField = Rectangle(60f, 485f, 240f, 40f)
+    val loginButton = Rectangle(60f, 550f, 240f, 50f)
+
+
+
     val placementBoard = Rectangle(0f, 85f, 360f, 360f)
     //val placementBoard = Rectangle(0f, 280f, 360f, 360f)  //DEBUG
 

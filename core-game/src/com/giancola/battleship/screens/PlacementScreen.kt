@@ -6,15 +6,13 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.giancola.battleship.BattleshipGame
-import com.giancola.battleship.gamelogic.*
-import com.giancola.battleship.GameConstants.N_COLS
-import com.giancola.battleship.GameConstants.N_ROWS
 import com.giancola.battleship.GameConstants.TILE_SIZE
 import com.giancola.battleship.LayoutConstants
 import com.giancola.battleship.actors.InteractiveShipActor
 import com.giancola.battleship.actors.PlacementBoard
 import com.giancola.battleship.actors.getBoundingBox
 import com.giancola.battleship.actors.overlaps
+import com.giancola.battleship.gamelogic.*
 import com.giancola.battleship.net.RemoteClient
 import com.giancola.battleship.ui.Styles
 import ktx.actors.onClick
@@ -22,8 +20,8 @@ import ktx.app.KtxScreen
 import kotlin.math.roundToInt
 
 
-class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAdapter() {
-    private val playerData = PlayerData("Guerino", ShipFactory.standardSetup, N_ROWS, N_COLS)
+class PlacementScreen(private val gameApp: BattleshipGame, private val client: RemoteClient,
+                      private val playerData: PlayerData, private val playerId: PlayerId) : KtxScreen, InputAdapter(), GameLogicListener {
 
     private val bkg: Image
     val board: PlacementBoard
@@ -42,22 +40,14 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
         confirmButton = TextButton("Confirm", Styles.buttonStyle)
         val r = LayoutConstants.standard2worldCoords(LayoutConstants.placementButton)
         confirmButton.setBounds(r.x, r.y, r.width, r.height)
+
         confirmButton.onClick {
-            Gdx.app.log("Battleship", "Switching to combat screen")
-
             updatePlayerData()
+            client.sendSetPlacement(playerData)
+            Gdx.app.log("Battleship", "sending setPlacement command")
 
-            gameApp.stg.clear()
-
-            //val gameLogic = LocalGameLogic()
-            //val combatScreen = CombatScreen(gameApp, gameLogic, playerData)
-            val client = RemoteClient("localhost", 8080) //TODO: get from configuration
-            val combatScreen = CombatScreen(gameApp, client, playerData)
-
-            gameApp.addScreen(combatScreen)
-            gameApp.setScreen<CombatScreen>()
-
-            dispose()
+            confirmButton.isDisabled = true
+            confirmButton.setText("Waiting for enemy...")
         }
         confirmButton.isDisabled = true
         gameApp.stg.addActor(confirmButton)
@@ -122,4 +112,26 @@ class PlacementScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAda
             )
         }
     }
+
+
+
+    override fun onGameStarting(playerId: PlayerId) {}
+    override fun onGameStarted() {}
+
+    override fun onCombatStarted(whoseTurn: PlayerId) {
+        Gdx.app.log("Battleship", "Switching to combat screen")
+
+        gameApp.stg.clear()
+
+        val combatScreen = CombatScreen(gameApp, client, playerData, playerId, whoseTurn)
+        client.localListener = combatScreen
+
+        gameApp.addScreen(combatScreen)
+        gameApp.setScreen<CombatScreen>()
+
+        dispose()
+    }
+
+    override fun onShot(shooter: PlayerId, gridX: Int, gridY: Int, shotResult: ShotResult?) {}
+    override fun onGameFinished(winner: PlayerId) {}
 }

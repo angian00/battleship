@@ -1,15 +1,14 @@
 package com.giancola.battleship
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.StretchViewport
-import com.giancola.battleship.screens.PlacementScreen
+import com.giancola.battleship.screens.LoginScreen
 import ktx.app.KtxGame
-import com.badlogic.gdx.InputMultiplexer
-import com.giancola.battleship.screens.CombatScreen
 
 
 class BattleshipGame: KtxGame<Screen>() {
@@ -39,8 +38,8 @@ class BattleshipGame: KtxGame<Screen>() {
         im.addProcessor(this.stg)
         Gdx.input.inputProcessor = im
 
-        addScreen(PlacementScreen(this))
-        setScreen<PlacementScreen>()
+        addScreen(LoginScreen(this))
+        setScreen<LoginScreen>()
     }
 
 
