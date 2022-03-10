@@ -26,7 +26,8 @@ class LoginScreen(private val gameApp: BattleshipGame) : KtxScreen, InputAdapter
     init {
         gameApp.im.addProcessor(this)
 
-        client = RemoteClient("localhost", 8080) //TODO: get from configuration
+        //client = RemoteClient("localhost", 8080) //TODO: get from configuration
+        client = RemoteClient("angian-00", 8080) //TODO: get from configuration
         client.localListener = this
 
 

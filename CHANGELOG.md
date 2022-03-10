@@ -2,6 +2,14 @@
 # Change Log
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [0.6] - 2022-03-
+
+### Added
+- deployed Virtual Private Server on the public internet
+
+### Fixed
+- logback configuration
+
 ## [0.5] - 2022-03-04
 
 ### Added

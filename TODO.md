@@ -1,11 +1,12 @@
 # TODO
 
 - splash screen image
+- get hostname, port from configuration
 - add player names to combat ui (and placement ui?)
 
+  
 - troubleshooting server: connessioni >2 client
 - check ai is still working
-- get hostname, port from configuration  
 
 ? synchronize properly
 
