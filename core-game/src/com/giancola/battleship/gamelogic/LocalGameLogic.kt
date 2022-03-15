@@ -35,12 +35,12 @@ class LocalGameLogic: GameLogic() {
         }.start()
     }
 
-    override fun notifyCombatStarted(playerTurn: PlayerId) {
+    override fun notifyCombatStarted(playerTurn: PlayerId, playerNames: Map<PlayerId, String>) {
         Thread {
             randomSleep()
             Gdx.app.postRunnable {
                 for (listener in playerListeners.values)
-                    listener.onCombatStarted(playerTurn)
+                    listener.onCombatStarted(playerTurn, playerNames)
             }
 
         }.start()
@@ -80,7 +80,9 @@ class LocalGameLogic: GameLogic() {
 interface GameLogicListener {
     fun onGameStarting(playerId: PlayerId)
     fun onGameStarted()
-    fun onCombatStarted(whoseTurn: PlayerId)
+    fun onCombatStarted(whoseTurn: PlayerId, playerNames: Map<PlayerId, String>)
     fun onShot(shooter: PlayerId, gridX: Int, gridY: Int, shotResult: ShotResult?)
     fun onGameFinished(winner: PlayerId)
+
+    fun onError(error: String?)
 }

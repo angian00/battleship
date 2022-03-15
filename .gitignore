@@ -5,3 +5,5 @@ out/
 
 *.iml
 local.properties
+
+logs/

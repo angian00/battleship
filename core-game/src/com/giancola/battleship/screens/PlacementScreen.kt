@@ -21,7 +21,8 @@ import kotlin.math.roundToInt
 
 
 class PlacementScreen(private val gameApp: BattleshipGame, private val client: RemoteClient,
-                      private val playerData: PlayerData, private val playerId: PlayerId) : KtxScreen, InputAdapter(), GameLogicListener {
+                      private val playerData: PlayerData, private val playerId: PlayerId) :
+            KtxScreen, InputAdapter(), GameLogicListener {
 
     private val bkg: Image
     val board: PlacementBoard
@@ -118,12 +119,12 @@ class PlacementScreen(private val gameApp: BattleshipGame, private val client: R
     override fun onGameStarting(playerId: PlayerId) {}
     override fun onGameStarted() {}
 
-    override fun onCombatStarted(whoseTurn: PlayerId) {
+    override fun onCombatStarted(whoseTurn: PlayerId, playerNames: Map<PlayerId, String>) {
         Gdx.app.log("Battleship", "Switching to combat screen")
 
         gameApp.stg.clear()
 
-        val combatScreen = CombatScreen(gameApp, client, playerData, playerId, whoseTurn)
+        val combatScreen = CombatScreen(gameApp, client, playerData, playerId, playerNames, whoseTurn)
         client.localListener = combatScreen
 
         gameApp.addScreen(combatScreen)
@@ -134,4 +135,9 @@ class PlacementScreen(private val gameApp: BattleshipGame, private val client: R
 
     override fun onShot(shooter: PlayerId, gridX: Int, gridY: Int, shotResult: ShotResult?) {}
     override fun onGameFinished(winner: PlayerId) {}
+
+
+    override fun onError(error: String?) {
+        Gdx.app.log("Battleship", "Error: $error")
+    }
 }

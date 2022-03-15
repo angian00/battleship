@@ -4,12 +4,16 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.Align
 import com.giancola.battleship.GraphicsConstants
+import com.giancola.battleship.GraphicsConstants.messageFadeOutDuration
 import com.giancola.battleship.LayoutConstants
 import com.giancola.battleship.ui.Styles.labelStyle
 import com.giancola.battleship.ui.Styles.labelStyleSmall
+import ktx.actors.alpha
+import ktx.actors.then
 
 
 open class MessageLabel(stage: Stage, layoutRect: Rectangle, style: LabelStyle): Label("", style) {
@@ -24,19 +28,17 @@ open class MessageLabel(stage: Stage, layoutRect: Rectangle, style: LabelStyle):
     }
 }
 
+class CombatNamesLabel(stage: Stage): MessageLabel(stage, LayoutConstants.standard2worldCoords(LayoutConstants.combatNamesLabel), labelStyleSmall)
 class CombatFeedbackLabel(stage: Stage): MessageLabel(stage, LayoutConstants.standard2worldCoords(LayoutConstants.combatFeedbackLabel), labelStyleSmall)
-
 class CombatTurnLabel(stage: Stage): MessageLabel(stage, LayoutConstants.standard2worldCoords(LayoutConstants.combatTurnLabel), labelStyle)
-
 class CombatTimeLabel(stage: Stage): MessageLabel(stage, LayoutConstants.standard2worldCoords(LayoutConstants.combatTimeLabel), labelStyleSmall)
 
-/*
-class Message: Label {
-    constructor(stage: Stage): super("", Styles.labelStyle) {
+
+class FadeOutMessage(stage: Stage) : Label("", Styles.labelStyle) {
+    init {
         this.width = stage.width
         this.height = stage.height
         this.setAlignment(Align.center)
-
         this.isVisible = false
         stage.addActor(this)
     }
@@ -50,8 +52,8 @@ class Message: Label {
 
     fun showAndFade(message: String) {
         show(message)
-        this.addAction(Actions.fadeOut(messageFadeOutDuration)
+        this.addAction(
+            Actions.fadeOut(messageFadeOutDuration)
             .then(Actions.hide()))
     }
 }
-*/

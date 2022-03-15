@@ -17,9 +17,9 @@ object GameConstants {
 
 
 object LayoutConstants {
-    val loginTextField = Rectangle(60f, 485f, 240f, 40f)
-    val loginButton = Rectangle(60f, 550f, 240f, 50f)
-
+    val serverTextField = Rectangle(60f, 463f, 240f, 40f)
+    val loginTextField = Rectangle(60f, 520f, 240f, 40f)
+    val loginButton = Rectangle(60f, 580f, 240f, 50f)
 
 
     val placementBoard = Rectangle(0f, 85f, 360f, 360f)
@@ -39,9 +39,11 @@ object LayoutConstants {
     val combatPlayerBoard = Rectangle(0f, 85f, 180f, 180f)
     val combatEnemyBoard  = Rectangle(0f, 280f, 360f, 360f)
 
-    val combatFeedbackLabel = Rectangle(185f, 85f, 170f, 80f)
-    val combatTurnLabel = Rectangle(185f, 185f, 170f, 40f)
-    val combatTimeLabel = Rectangle(185f, 224f, 170f, 40f)
+    val combatNamesLabel = Rectangle(185f, 85f, 170f, 60f)
+    val combatFeedbackLabel = Rectangle(185f, 145f, 170f, 60f)
+    val combatTurnLabel = Rectangle(185f, 205f, 170f, 40f)
+    val combatTimeLabel = Rectangle(185f, 235f, 170f, 40f)
+
 
 
     fun standard2worldCoords(layoutRect: Rectangle): Rectangle {
@@ -63,4 +65,6 @@ object GraphicsConstants {
     val feedbackGoodColor: Color = Color.GREEN
     val feedbackNeutralColor: Color = Color.DARK_GRAY
     val feedbackBadColor: Color = Color.RED
+
+    val messageFadeOutDuration = 2.0f
 }

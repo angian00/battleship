@@ -9,7 +9,11 @@ import kotlinx.serialization.json.Json
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+
+const val START_INTERVAL = 3000L //in ms
+
 class ServerGameLogic(): GameLogic() {
+
     private var playerConnections: MutableMap<PlayerId, ClientConnection> = mutableMapOf()
     //private var connToId: Map<String, PlayerId> = mapOf(conn1.id to PlayerId.Player1, conn2.id to PlayerId.Player2)
     private var connIdToPlayerId: MutableMap<String, PlayerId> = mutableMapOf()
@@ -30,6 +34,7 @@ class ServerGameLogic(): GameLogic() {
         sendNotification(playerId, NotificationGameStarting(playerId))
 
         if (playerConnections.values.size == 2) {
+            Thread.sleep(START_INTERVAL)
             logger.info("Starting game")
             startGame()
         }
@@ -49,7 +54,7 @@ class ServerGameLogic(): GameLogic() {
 
 
     fun shoot(connId: String, gridX: Int, gridY: Int) {
-        val playerId = connIdToPlayerId[connId] ?: return
+        val playerId = connIdToPlayerId[connId]
 
         if (playerId == null) {
             logger.error("connId not found: $connId")
@@ -64,8 +69,8 @@ class ServerGameLogic(): GameLogic() {
         sendNotification(NotificationGameStarted())
     }
 
-    override fun notifyCombatStarted(playerTurn: PlayerId) {
-        sendNotification(NotificationCombatStarted(playerTurn))
+    override fun notifyCombatStarted(playerTurn: PlayerId, playerNames: Map<PlayerId, String>) {
+        sendNotification(NotificationCombatStarted(playerTurn, playerNames))
     }
 
     override fun notifyGameFinished(winner: PlayerId) {
@@ -87,7 +92,6 @@ class ServerGameLogic(): GameLogic() {
     private fun sendNotification(notification: RemoteNotification) {
         logger.debug("Sending notification: $notification")
         for (conn in playerConnections.values) {
-            val testNotification = NotificationCombatStarted(connIdToPlayerId[conn.id]!!)
             GlobalScope.launch { conn.session.send(Frame.Text(jsonFormatter.encodeToString(RemoteNotification.serializer(), notification))) }
         }
     }

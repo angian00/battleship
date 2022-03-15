@@ -28,7 +28,7 @@ data class NotificationGameStarting(val playerId: PlayerId): RemoteNotification(
 class NotificationGameStarted: RemoteNotification()
 
 @Serializable
-data class NotificationCombatStarted(val playerTurn: PlayerId): RemoteNotification()
+data class NotificationCombatStarted(val playerTurn: PlayerId, val playerNames: Map<PlayerId, String>): RemoteNotification()
 
 @Serializable
 data class NotificationShotPerformed(val shooter: PlayerId, val gridX: Int, val gridY: Int, val shotResult: ShotResult?): RemoteNotification()

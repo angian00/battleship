@@ -1,16 +1,8 @@
 # TODO
 
-- splash screen image
-- get hostname, port from configuration
-- add player names to combat ui (and placement ui?)
-
-  
-- troubleshooting server: connessioni >2 client
+- manage disconnection of other player
+- bugfixing server after multiple connections/disconnections
 - check ai is still working
-
-? synchronize properly
-
-## v0.5:
 
 - android:
   - verify apk
@@ -18,9 +10,9 @@
 
 
 ## Details
-- add start game sound
-- add end game sound
-- improve hit sound
+? add start game sound
+? add end game sound
+? improve hit sound
 
 ? differentiate hit, miss, sink sounds for enemy vs. player
   

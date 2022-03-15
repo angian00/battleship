@@ -3,8 +3,10 @@ package com.giancola.battleship.screens
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.scenes.scene2d.ui.Button
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.giancola.battleship.BattleshipGame
 import com.giancola.battleship.GameConstants.TILE_SIZE
 import com.giancola.battleship.GameConstants.TILE_SIZE_SMALL
@@ -13,6 +15,7 @@ import com.giancola.battleship.GraphicsConstants.feedbackBadColor
 import com.giancola.battleship.GraphicsConstants.feedbackGoodColor
 import com.giancola.battleship.GraphicsConstants.feedbackNeutralColor
 import com.giancola.battleship.GraphicsConstants.playerShipColor
+import com.giancola.battleship.LayoutConstants
 import com.giancola.battleship.Sounds
 import com.giancola.battleship.actors.CombatEnemyBoard
 import com.giancola.battleship.actors.CombatPlayerBoard
@@ -20,27 +23,32 @@ import com.giancola.battleship.actors.ShipActor
 import com.giancola.battleship.coords2str
 import com.giancola.battleship.gamelogic.*
 import com.giancola.battleship.net.RemoteClient
-import com.giancola.battleship.ui.CombatFeedbackLabel
-import com.giancola.battleship.ui.CombatTimeLabel
-import com.giancola.battleship.ui.CombatTurnLabel
+import com.giancola.battleship.ui.*
+import ktx.actors.onClick
 import ktx.app.KtxScreen
 
 
 class CombatScreen(private val gameApp: BattleshipGame, private val client: RemoteClient,
-                   private val playerData: PlayerData, private val playerId: PlayerId, startTurn: PlayerId) : KtxScreen, InputAdapter(), GameLogicListener {
+                   private val playerData: PlayerData, private val playerId: PlayerId,
+                   private val playerNames: Map<PlayerId, String>, startTurn: PlayerId) :
+            KtxScreen, InputAdapter(), GameLogicListener {
 
     private val playerShipActors: Map<ShipId, ShipActor>
     private val enemyShipActors: MutableMap<ShipId, ShipActor> = mutableMapOf()
+
+    var moveTime: Float
 
     private val bkg: Image
     private val playerBoard: CombatPlayerBoard
     private val enemyBoard: CombatEnemyBoard
 
+    private val combatNamesLabel: Label
     private val feedbackLabel: Label
     private val turnLabel: Label
     private val timeLabel: Label
 
-    var moveTime: Float
+    private val restartButton: Button
+
 
     init {
         val stage = gameApp.stg
@@ -53,11 +61,30 @@ class CombatScreen(private val gameApp: BattleshipGame, private val client: Remo
         playerBoard = CombatPlayerBoard(stage)
         enemyBoard = CombatEnemyBoard(this, stage)
 
+        combatNamesLabel = CombatNamesLabel(stage)
         feedbackLabel = CombatFeedbackLabel(stage)
         turnLabel = CombatTurnLabel(stage)
         timeLabel = CombatTimeLabel(stage)
 
         initLabels(startTurn)
+
+        restartButton = TextButton("New Game", Styles.buttonStyle)
+        val r = LayoutConstants.standard2worldCoords(LayoutConstants.combatTurnLabel)
+        restartButton.setBounds(r.x, r.y, r.width, r.height)
+        restartButton.onClick {
+            gameApp.stg.clear()
+
+            gameApp.removeScreen<LoginScreen>()
+            gameApp.removeScreen<PlacementScreen>()
+            gameApp.removeScreen<CombatScreen>()
+
+            gameApp.addScreen(LoginScreen(gameApp))
+            gameApp.setScreen<LoginScreen>()
+
+            dispose()
+        }
+        restartButton.isVisible = false
+        gameApp.stg.addActor(restartButton)
 
         playerShipActors = initShips()
 
@@ -188,6 +215,8 @@ class CombatScreen(private val gameApp: BattleshipGame, private val client: Remo
 
 
     private fun initLabels(whoseTurn: PlayerId) {
+        combatNamesLabel.setText("${playerNames[PlayerId.Player1]} vs ${playerNames[PlayerId.Player2]}")
+
         val playerStr = when (whoseTurn) {
             playerId -> "Your"; else -> "Enemy's"
         }
@@ -202,8 +231,7 @@ class CombatScreen(private val gameApp: BattleshipGame, private val client: Remo
     //--------------- GameLogicListener methods ---------------
     override fun onGameStarting(playerId: PlayerId) {}
     override fun onGameStarted() {}
-
-    override fun onCombatStarted(whoseTurn: PlayerId) {}
+    override fun onCombatStarted(whoseTurn: PlayerId, playerNames: Map<PlayerId, String>) {}
 
     override fun onGameFinished(winner: PlayerId) {
         val playerStr = when (winner) { playerId -> "You"; else -> "Enemy" }
@@ -213,6 +241,9 @@ class CombatScreen(private val gameApp: BattleshipGame, private val client: Remo
 
         moveTime = 0f
         turnLabel.setText("")
+        turnLabel.isVisible = false
+
+        restartButton.isVisible = true
     }
 
 
@@ -221,6 +252,10 @@ class CombatScreen(private val gameApp: BattleshipGame, private val client: Remo
             playerShot(gridX, gridY, shotResult)
         else
             enemyShot(gridX, gridY, shotResult)
+    }
+
+    override fun onError(error: String?) {
+        Gdx.app.log("Battleship", "Error: $error")
     }
 
     //--------------- end GameLogicListener methods ---------------

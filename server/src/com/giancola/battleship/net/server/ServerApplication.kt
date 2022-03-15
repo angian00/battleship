@@ -32,7 +32,7 @@ fun Application.module() {
             val currConn = ClientConnection(this, incoming, outgoing)
             connections += currConn
 
-            logger.info("New connection; connId= ${currConn.id}")
+            logger.info("New connection ; connId= ${currConn.id}")
 
             //send("You are connected!")
             for (frame in incoming) {

@@ -15,9 +15,7 @@ import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
 
-class RemoteClient(private val hostname: String, private val port: Int) {
-    var localListener: GameLogicListener? = null
-
+class RemoteClient(private val hostname: String, private val port: Int, var localListener: GameLogicListener) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val client = HttpClient {
@@ -32,13 +30,17 @@ class RemoteClient(private val hostname: String, private val port: Int) {
 
     init {
         GlobalScope.launch {
-            client.webSocket(method = HttpMethod.Get, host = this@RemoteClient.hostname, port = this@RemoteClient.port, path = "/play") {
-                this@RemoteClient.outgoing = outgoing
-                while (true) {
-                    val frame = incoming.receive() as? Frame.Text ?: continue
-                    val notification = Json.decodeFromString(RemoteNotification.serializer(), frame.readText())
-                    onNotification(notification)
+            try {
+                client.webSocket(method = HttpMethod.Get, host = this@RemoteClient.hostname, port = this@RemoteClient.port, path = "/play") {
+                    this@RemoteClient.outgoing = outgoing
+                    while (true) {
+                        val frame = incoming.receive() as? Frame.Text ?: continue
+                        val notification = Json.decodeFromString(RemoteNotification.serializer(), frame.readText())
+                        onNotification(notification)
+                    }
                 }
+            } catch (e: Exception) {
+                localListener.onError(e.message)
             }
         }
     }
@@ -86,7 +88,7 @@ class RemoteClient(private val hostname: String, private val port: Int) {
             when (notif) {
                 is NotificationGameStarting -> localListener?.onGameStarting(notif.playerId)
                 is NotificationGameStarted -> localListener?.onGameStarted()
-                is NotificationCombatStarted -> localListener?.onCombatStarted(notif.playerTurn)
+                is NotificationCombatStarted -> localListener?.onCombatStarted(notif.playerTurn, notif.playerNames)
                 is NotificationGameFinished -> localListener?.onGameFinished(notif.winner)
                 is NotificationShotPerformed -> localListener?.onShot(notif.shooter, notif.gridX, notif.gridY, notif.shotResult)
                 else -> { /* ignore */ }

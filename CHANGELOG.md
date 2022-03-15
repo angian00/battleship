@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [0.6] - 2022-03-
 
 ### Added
+- splash screen image to LoginScreen
+- hostname field to LoginScreen
+- player names to CombatScreen
+- New Game button to CombatScreen after game is finished
+
 - deployed Virtual Private Server on the public internet
 
 ### Fixed

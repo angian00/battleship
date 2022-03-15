@@ -59,7 +59,7 @@ class AIPlayer(private val game: LocalGameLogic): GameLogicListener {
         game.setPlacement(playerId, playerData)
     }
 
-    override fun onCombatStarted(whoseTurn: PlayerId) {
+    override fun onCombatStarted(whoseTurn: PlayerId, playerNames: Map<PlayerId, String>) {
         if (whoseTurn == playerId)
             makeRandomShot()
     }
@@ -70,6 +70,10 @@ class AIPlayer(private val game: LocalGameLogic): GameLogicListener {
     }
 
     override fun onGameFinished(winner: PlayerId) {
+        //do nothing
+    }
+
+    override fun onError(error: String?) {
         //do nothing
     }
 
