@@ -18,6 +18,7 @@ abstract class GameLogic {
     protected abstract fun notifyGameStarted()
     protected abstract fun notifyCombatStarted(playerTurn: PlayerId, playerNames: Map<PlayerId, String>)
     protected abstract fun notifyGameFinished(winner: PlayerId)
+    protected abstract fun notifyGameDisconnected()
     protected abstract fun notifyShot(shooter: PlayerId, gridX: Int, gridY: Int, shotResult: ShotResult?)
 
     private var nextPlayerId: PlayerId? = PlayerId.Player1
@@ -64,8 +65,6 @@ abstract class GameLogic {
                 }
             }
         }
-
-
     }
 
     fun startGame() {

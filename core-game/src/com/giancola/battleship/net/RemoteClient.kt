@@ -46,6 +46,7 @@ class RemoteClient(private val hostname: String, private val port: Int, var loca
     }
 
     fun dispose() {
+        this@RemoteClient.outgoing?.close()
         client.close()
     }
 
@@ -86,12 +87,12 @@ class RemoteClient(private val hostname: String, private val port: Int, var loca
 
         Gdx.app.postRunnable {
             when (notif) {
-                is NotificationGameStarting -> localListener?.onGameStarting(notif.playerId)
-                is NotificationGameStarted -> localListener?.onGameStarted()
-                is NotificationCombatStarted -> localListener?.onCombatStarted(notif.playerTurn, notif.playerNames)
-                is NotificationGameFinished -> localListener?.onGameFinished(notif.winner)
-                is NotificationShotPerformed -> localListener?.onShot(notif.shooter, notif.gridX, notif.gridY, notif.shotResult)
-                else -> { /* ignore */ }
+                is NotificationGameStarting -> localListener.onGameStarting(notif.playerId)
+                is NotificationGameStarted -> localListener.onGameStarted()
+                is NotificationCombatStarted -> localListener.onCombatStarted(notif.playerTurn, notif.playerNames)
+                is NotificationGameFinished -> localListener.onGameFinished(notif.winner)
+                is NotificationGameDisconnected -> localListener.onGameDisconnected()
+                is NotificationShotPerformed -> localListener.onShot(notif.shooter, notif.gridX, notif.gridY, notif.shotResult)
             }
         }
     }

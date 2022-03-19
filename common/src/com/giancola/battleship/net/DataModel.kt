@@ -36,6 +36,8 @@ data class NotificationShotPerformed(val shooter: PlayerId, val gridX: Int, val 
 @Serializable
 data class NotificationGameFinished(val winner: PlayerId): RemoteNotification()
 
+@Serializable
+class NotificationGameDisconnected(): RemoteNotification()
 
 
 

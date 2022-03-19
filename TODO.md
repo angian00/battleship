@@ -1,12 +1,6 @@
 # TODO
 
-- manage disconnection of other player
-- bugfixing server after multiple connections/disconnections
 - check ai is still working
-
-- android:
-  - verify apk
-  - verify launcher icons
 
 
 ## Details

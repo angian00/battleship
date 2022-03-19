@@ -60,6 +60,17 @@ class LocalGameLogic: GameLogic() {
         }.start()
     }
 
+    override fun notifyGameDisconnected() {
+        Thread {
+            randomSleep()
+            Gdx.app.postRunnable {
+                for (listener in playerListeners.values)
+                    listener.onGameDisconnected()
+            }
+
+        }.start()
+    }
+
     override fun notifyShot(shooter: PlayerId, gridX: Int, gridY: Int, shotResult: ShotResult?) {
         Thread {
             randomSleep()
@@ -84,5 +95,6 @@ interface GameLogicListener {
     fun onShot(shooter: PlayerId, gridX: Int, gridY: Int, shotResult: ShotResult?)
     fun onGameFinished(winner: PlayerId)
 
+    fun onGameDisconnected()
     fun onError(error: String?)
 }

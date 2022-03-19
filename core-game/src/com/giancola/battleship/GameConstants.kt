@@ -66,5 +66,8 @@ object GraphicsConstants {
     val feedbackNeutralColor: Color = Color.DARK_GRAY
     val feedbackBadColor: Color = Color.RED
 
+    val disconnectionMessageDuration = 3.0f
+    val disconnectionMessageText = "GAME DISCONNECTED"
+
     val messageFadeOutDuration = 2.0f
 }

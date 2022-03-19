@@ -3,11 +3,12 @@ package com.giancola.battleship.screens
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.scenes.scene2d.ui.Button
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
-import com.giancola.battleship.BattleshipGame
+import com.giancola.battleship.*
 import com.giancola.battleship.GameConstants.TILE_SIZE
 import com.giancola.battleship.GameConstants.TILE_SIZE_SMALL
 import com.giancola.battleship.GraphicsConstants.enemyShipColor
@@ -15,12 +16,9 @@ import com.giancola.battleship.GraphicsConstants.feedbackBadColor
 import com.giancola.battleship.GraphicsConstants.feedbackGoodColor
 import com.giancola.battleship.GraphicsConstants.feedbackNeutralColor
 import com.giancola.battleship.GraphicsConstants.playerShipColor
-import com.giancola.battleship.LayoutConstants
-import com.giancola.battleship.Sounds
 import com.giancola.battleship.actors.CombatEnemyBoard
 import com.giancola.battleship.actors.CombatPlayerBoard
 import com.giancola.battleship.actors.ShipActor
-import com.giancola.battleship.coords2str
 import com.giancola.battleship.gamelogic.*
 import com.giancola.battleship.net.RemoteClient
 import com.giancola.battleship.ui.*
@@ -72,17 +70,11 @@ class CombatScreen(private val gameApp: BattleshipGame, private val client: Remo
         val r = LayoutConstants.standard2worldCoords(LayoutConstants.combatTurnLabel)
         restartButton.setBounds(r.x, r.y, r.width, r.height)
         restartButton.onClick {
-            gameApp.stg.clear()
-
-            gameApp.removeScreen<LoginScreen>()
-            gameApp.removeScreen<PlacementScreen>()
-            gameApp.removeScreen<CombatScreen>()
-
-            gameApp.addScreen(LoginScreen(gameApp))
-            gameApp.setScreen<LoginScreen>()
-
+            client.dispose()
             dispose()
+            gameApp.restart()
         }
+
         restartButton.isVisible = false
         gameApp.stg.addActor(restartButton)
 
@@ -246,6 +238,24 @@ class CombatScreen(private val gameApp: BattleshipGame, private val client: Remo
         restartButton.isVisible = true
     }
 
+    override fun onGameDisconnected() {
+        Gdx.app.log("Battleship", "Game disconnected")
+
+        val msg = OverlayMessage(gameApp.stg)
+        msg.setText(GraphicsConstants.disconnectionMessageText)
+
+        msg.addAction(
+            Actions.sequence(
+                Actions.show(),
+                Actions.delay(GraphicsConstants.disconnectionMessageDuration),
+                Actions.run {
+                    client.dispose()
+                    this@CombatScreen.dispose()
+                    gameApp.restart()
+                }
+            )
+        )
+    }
 
     override fun onShot(shooter: PlayerId, gridX: Int, gridY: Int, shotResult: ShotResult?) {
         if (shooter == playerId)

@@ -32,10 +32,12 @@ class GameMaster {
     }
 
     fun removeConn(playerConn: ClientConnection) {
+        val currGame = playerConn.currGame ?: return
+
         activeGames.remove(playerConn.currGame)
-        playerConn.currGame = null
         playerConns.remove(playerConn.id)
-        //FIXME: set to null activeGame for other player
+
+        currGame.unregisterConnection(playerConn)
     }
 
     private fun login(playerConn: ClientConnection) {

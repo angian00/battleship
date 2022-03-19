@@ -14,7 +14,7 @@ const val START_INTERVAL = 3000L //in ms
 
 class ServerGameLogic(): GameLogic() {
 
-    private var playerConnections: MutableMap<PlayerId, ClientConnection> = mutableMapOf()
+    var playerConnections: MutableMap<PlayerId, ClientConnection> = mutableMapOf()
     //private var connToId: Map<String, PlayerId> = mapOf(conn1.id to PlayerId.Player1, conn2.id to PlayerId.Player2)
     private var connIdToPlayerId: MutableMap<String, PlayerId> = mutableMapOf()
 
@@ -40,6 +40,14 @@ class ServerGameLogic(): GameLogic() {
         }
 
         return playerId
+    }
+
+    fun unregisterConnection(conn: ClientConnection) {
+        val playerId = connIdToPlayerId[conn.id] ?: return
+        playerConnections.remove(playerId)
+        connIdToPlayerId.remove(conn.id)
+
+        sendNotification(playerId.otherPlayer, NotificationGameDisconnected())
     }
 
     fun setPlacement(connId: String, playerData: PlayerData) {
@@ -75,6 +83,10 @@ class ServerGameLogic(): GameLogic() {
 
     override fun notifyGameFinished(winner: PlayerId) {
         sendNotification(NotificationGameFinished(winner))
+    }
+
+    override fun notifyGameDisconnected() {
+        sendNotification(NotificationGameDisconnected())
     }
 
     override fun notifyShot(shooter: PlayerId, gridX: Int, gridY: Int, shotResult: ShotResult?) {

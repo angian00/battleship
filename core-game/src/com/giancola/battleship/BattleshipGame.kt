@@ -48,4 +48,20 @@ class BattleshipGame: KtxGame<Screen>() {
         this.stg.dispose()
         super.dispose()
     }
+
+    fun restart() {
+        stg.clear()
+
+        for (screenEntry in screens.entries()) {
+            val screenClass = screenEntry.key!!
+            //val screen = screenEntry.value!!
+
+            screens.remove(screenClass)
+        }
+
+        addScreen(LoginScreen(this))
+        setScreen<LoginScreen>()
+    }
+
+
 }

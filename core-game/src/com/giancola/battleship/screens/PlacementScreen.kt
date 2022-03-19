@@ -3,10 +3,12 @@ package com.giancola.battleship.screens
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.giancola.battleship.BattleshipGame
 import com.giancola.battleship.GameConstants.TILE_SIZE
+import com.giancola.battleship.GraphicsConstants
 import com.giancola.battleship.LayoutConstants
 import com.giancola.battleship.actors.InteractiveShipActor
 import com.giancola.battleship.actors.PlacementBoard
@@ -14,6 +16,7 @@ import com.giancola.battleship.actors.getBoundingBox
 import com.giancola.battleship.actors.overlaps
 import com.giancola.battleship.gamelogic.*
 import com.giancola.battleship.net.RemoteClient
+import com.giancola.battleship.ui.OverlayMessage
 import com.giancola.battleship.ui.Styles
 import ktx.actors.onClick
 import ktx.app.KtxScreen
@@ -132,6 +135,26 @@ class PlacementScreen(private val gameApp: BattleshipGame, private val client: R
 
         dispose()
     }
+
+    override fun onGameDisconnected() {
+        Gdx.app.log("Battleship", "Game disconnected")
+
+        val msg = OverlayMessage(gameApp.stg)
+        msg.setText(GraphicsConstants.disconnectionMessageText)
+
+        msg.addAction(
+            Actions.sequence(
+                Actions.show(),
+                Actions.delay(GraphicsConstants.disconnectionMessageDuration),
+                Actions.run {
+                    client.dispose()
+                    this@PlacementScreen.dispose()
+                    gameApp.restart()
+                }
+            )
+        )
+    }
+
 
     override fun onShot(shooter: PlayerId, gridX: Int, gridY: Int, shotResult: ShotResult?) {}
     override fun onGameFinished(winner: PlayerId) {}

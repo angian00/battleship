@@ -73,6 +73,10 @@ class AIPlayer(private val game: LocalGameLogic): GameLogicListener {
         //do nothing
     }
 
+    override fun onGameDisconnected() {
+        //do nothing
+    }
+
     override fun onError(error: String?) {
         //do nothing
     }

@@ -8,6 +8,7 @@ import io.ktor.application.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.serialization.json.Json
@@ -34,22 +35,30 @@ fun Application.module() {
 
             logger.info("New connection ; connId= ${currConn.id}")
 
-            //send("You are connected!")
-            for (frame in incoming) {
-                when (frame) {
-                    is Frame.Text -> {
-                        logger.debug("text frame received: ${frame.readText()}")
+            try {
+                for (frame in incoming) {
+                    when (frame) {
+                        is Frame.Text -> {
+                            logger.debug("text frame received: ${frame.readText()}")
 
-                        val cmd = jsonFormatter.decodeFromString(RemoteCommand.serializer(), frame.readText())
-                        gameMaster.executeCommand(currConn, cmd)
-                    } else -> {
-                        //ignore
+                            val cmd = jsonFormatter.decodeFromString(RemoteCommand.serializer(), frame.readText())
+                            gameMaster.executeCommand(currConn, cmd)
+                        } else -> {
+                            //ignore
+                        }
                     }
                 }
-            }
 
-            connections -= currConn
-            gameMaster.removeConn(currConn)
+            } catch (e: ClosedReceiveChannelException) {
+                println("onClose ${closeReason.await()}")
+            } catch (e: Throwable) {
+                println("onError ${closeReason.await()}")
+                e.printStackTrace()
+
+            } finally {
+                connections -= currConn
+                gameMaster.removeConn(currConn)
+            }
         }
     }
 

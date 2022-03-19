@@ -34,11 +34,14 @@ class CombatTurnLabel(stage: Stage): MessageLabel(stage, LayoutConstants.standar
 class CombatTimeLabel(stage: Stage): MessageLabel(stage, LayoutConstants.standard2worldCoords(LayoutConstants.combatTimeLabel), labelStyleSmall)
 
 
-class FadeOutMessage(stage: Stage) : Label("", Styles.labelStyle) {
+class OverlayMessage(stage: Stage) : Label("", labelStyle) {
     init {
         this.width = stage.width
         this.height = stage.height
         this.setAlignment(Align.center)
+        this.color = Color.BLACK
+
+        this.toFront()
         this.isVisible = false
         stage.addActor(this)
     }

@@ -2,18 +2,22 @@
 # Change Log
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [0.6] - 2022-03-
+## [0.6] - 2022-03-19
 
 ### Added
 - splash screen image to LoginScreen
 - hostname field to LoginScreen
 - player names to CombatScreen
 - New Game button to CombatScreen after game is finished
+- management of other player disconnection
+- saving last login options on client
 
 - deployed Virtual Private Server on the public internet
 
 ### Fixed
 - logback configuration
+- instability after many connect/disconnect on server
+
 
 ## [0.5] - 2022-03-04
 
@@ -23,6 +27,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Modified
 - Refactored code to split common/ and core-game/ modules
+
 
 ## [0.4] - 2022-02-23
 
